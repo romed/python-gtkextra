@@ -1,3 +1,38 @@
+2002-01-04  Andreas Voegele  <voegelas@users.sourceforge.net>
+
+	* examples/testiterator.py:
+	initial checkin
+
+	* gtkextra/gtkplotdata-support.c:
+	The arguments of the plot functions are now set with standard Python
+	functions since the hack used before could cause trouble.
+
+2002-01-04  Toby D. Reeves  <toby@solidstatescientific.com>
+
+	* gtkextra/__init__.py:
+	Fixed two typos where heigth should have been height.
+
+	* codegen/mkgtkextra.py:
+	Use only Python 1.5.2 functions for making temp name.
+
+2002-01-04  Andreas Voegele  <voegelas@users.sourceforge.net>
+
+	* gtkextra/gtkextra.defs, gtkextra/__init__.py:
+	Fixed GtkPlotData.show_labels().
+
+	* codegen/definitions.py, codegen/defsparser.py, codegen/scmexpr.py:
+	Updated to new version from pygtk-1.99.6.
+
+	* gtkextra/gtkextramodule.c:
+	Removed the wrappers for gtk_sheet_get_entry(),
+	gtk_sheet_get_entry_widget(), gtk_sheet_get_vadjustment(),
+	gtk_sheet_get_hadjustment(), gtk_plot_canvas_get_active_plot() and
+	gtk_plot_canvas_get_active_data() since the updated code generator
+	now handles NULL returns.
+
+	* codegen/generate.py:
+	Incorporated the changes from pygtk-0.6.9.
+
 2002-01-03  Andreas Voegele  <voegelas@users.sourceforge.net>
 
 	* gtkextra/__init__.py: Added PLOT_CANVAS_MARKER. Updated
@@ -93,7 +128,7 @@
 	* gtkextra/gtkextramodule.c: Added gtk_plot_data_get_point(),
 	gtk_plot_data_add_marker(), gtk_plot_data_remove_marker().
 	Updated gtk_plot_data_get_gradient(), gtk_plot_data_set_points(),
-	gtk_plot_surface_set_points() gtk_sheet_get_entry_widget().
+	gtk_plot_surface_set_points().
 	
 	* gtkextra/gtkextra.override: Added gtk_plot_set_pc(),
 	gtk_plot_canvas_set_pc() to the list of ignored functions.  Added
