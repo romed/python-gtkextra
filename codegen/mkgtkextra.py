@@ -112,11 +112,12 @@ def read_overrides(filename):
     return overrides
 
 if __name__ == '__main__':
+    import tempfile
     # Convert the new defs into old defs.
     overrides = read_overrides('gtkextramodule.c')
     parser = defsparser.DefsParser('gtkextra.defs')
     parser.startParsing()
-    defsname = os.tmpnam()
+    defsname = tempfile.mktemp()
     defs = open(defsname, "w")
     write_defs(parser, overrides, defs)
     defs.close()
