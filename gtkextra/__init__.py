@@ -785,8 +785,8 @@ class GtkPlotData(_gtk.GtkWidget):
 		_gtkextra.gtk_plot_data_set_da(self._o, labels)
 	def get_labels(self):
 		return _gtkextra.gtk_plot_data_get_labels(self._o)
-	def show_labels(self):
-		return _gtkextra.gtk_plot_data_get_labels(self._o)
+	def show_labels(self, visible):
+		return _gtkextra.gtk_plot_data_show_labels(self._o, visible)
 	def labels_set_attributes(self, fontname, height, angle, foreground,
 				  background):
 		_gtkextra.gtk_plot_data_labels_set_attributes(self._o,

@@ -1340,7 +1340,7 @@
   (caller-owns-return #f)
   (can-return-null #t)
   (parameters
-    '("gboolean*" "out_show_labels")
+    '("gboolean*" "out_visible")
   )
 )
 
@@ -1349,7 +1349,7 @@
   (c-name "gtk_plot_data_show_labels")
   (return-type "none")
   (parameters
-    '("gboolean" "show_labels")
+    '("gboolean" "visible")
   )
 )
 
