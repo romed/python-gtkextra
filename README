@@ -32,10 +32,6 @@ Please read the file INSTALL for installation instructions.
 The  newest version  of the  Python  bindings is  always available  at
 http://python-gtkextra.sourceforge.net/.
 
-If  you   want  to  contact   the  author  send  electronic   mail  to
-<voegelas@users.sourceforge.net>  or paper  mail  to Andreas  Voegele,
-Gartenstr. 13, 71106 Magstadt, Germany.
-
 Local variables:
 default-justification: full
 fill-column: 70
