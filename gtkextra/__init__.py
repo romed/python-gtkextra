@@ -2165,8 +2165,6 @@ class GtkCharSelection(_gtk.GtkWindow):
 		return _gtkextra.gtk_char_selection_get_selection(self._o)
 _gtk._name2cls['GtkCharSelection'] = GtkCharSelection
 
-GtkCheckItem = _gtk.GtkCheckButton
-
 GtkSheetRange = _gtkextra.GtkSheetRange
 GtkPlotLine = _gtkextra.GtkPlotLine
 

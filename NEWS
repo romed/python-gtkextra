@@ -4,8 +4,7 @@ New in 0.22:
   of sublevels as an additional parameter.
 * GtkPlotData.set_points() accepts the tuple returned by get_points() as
   input.
-* GtkCheckItem will be removed in the next version.  Please use the
-  standard GtkCheckButton instead.
+* Removed GtkCheckItem.
 
 New in 0.21:
 * The bindings are now a package, ie. gtkextra/__init__.py is used
