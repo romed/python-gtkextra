@@ -69,37 +69,6 @@ _wrap_gtk_sheet_new(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-_wrap_gtk_sheet_get_entry(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    GtkWidget *entry_widget;
-
-    if (!PyArg_ParseTuple(args, "O!:gtk_sheet_get_entry", &PyGtk_Type, &obj))
-        return NULL;
-    entry_widget = gtk_sheet_get_entry(GTK_SHEET(PyGtk_Get(obj)));
-    if (entry_widget)
-	return PyGtk_New(GTK_OBJECT(entry_widget));
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-_wrap_gtk_sheet_get_entry_widget(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    GtkWidget *entry_widget;
-
-    if (!PyArg_ParseTuple(args, "O!:gtk_sheet_get_entry_widget",
-			  &PyGtk_Type, &obj))
-        return NULL;
-    entry_widget = gtk_sheet_get_entry_widget(GTK_SHEET(PyGtk_Get(obj)));
-    if (entry_widget)
-	return PyGtk_New(GTK_OBJECT(entry_widget));
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
 _wrap_gtk_sheet_get_visible_range(PyObject *self, PyObject *args)
 {
     PyObject *obj;
@@ -135,38 +104,6 @@ _wrap_gtk_sheet_clip_range(PyObject *self, PyObject *args)
 	rangep = NULL;
     }
     gtk_sheet_clip_range(GTK_SHEET(PyGtk_Get(obj)), rangep);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-_wrap_gtk_sheet_get_vadjustment(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    GtkAdjustment *adjustment;
-
-    if (!PyArg_ParseTuple(args, "O!:gtk_sheet_get_vadjustment",
-			  &PyGtk_Type, &obj))
-        return NULL;
-    adjustment = gtk_sheet_get_vadjustment(GTK_SHEET(PyGtk_Get(obj)));
-    if (adjustment)
-	return PyGtk_New(GTK_OBJECT(adjustment));
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-_wrap_gtk_sheet_get_hadjustment(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    GtkAdjustment *adjustment;
-
-    if (!PyArg_ParseTuple(args, "O!:gtk_sheet_get_hadjustment",
-			  &PyGtk_Type, &obj))
-        return NULL;
-    adjustment = gtk_sheet_get_hadjustment(GTK_SHEET(PyGtk_Get(obj)));
-    if (adjustment)
-	return PyGtk_New(GTK_OBJECT(adjustment));
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -2592,38 +2529,6 @@ _wrap_gtk_plot3d_minor_zgrid_get_attributes(PyObject *self, PyObject *args)
  */
 
 static PyObject *
-_wrap_gtk_plot_canvas_get_active_plot(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    GtkPlot *plot;
-
-    if (!PyArg_ParseTuple(args, "O!:gtk_plot_canvas_get_active_plot",
-			  &PyGtk_Type, &obj))
-        return NULL;
-    plot = gtk_plot_canvas_get_active_plot(GTK_PLOT_CANVAS(PyGtk_Get(obj)));
-    if (plot)
-	return PyGtk_New(GTK_OBJECT(plot));
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-_wrap_gtk_plot_canvas_get_active_data(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    GtkPlotData *data;
-
-    if (!PyArg_ParseTuple(args, "O!:gtk_plot_canvas_get_active_data",
-			  &PyGtk_Type, &obj))
-        return NULL;
-    data = gtk_plot_canvas_get_active_data(GTK_PLOT_CANVAS(PyGtk_Get(obj)));
-    if (data)
-	return PyGtk_New(GTK_OBJECT(data));
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
 _wrap_gtk_plot_canvas_get_active_point(PyObject *self, PyObject *args)
 {
     PyObject *obj;
@@ -3726,12 +3631,8 @@ static PyMethodDef _gtkextraMethods[] =
     { "GtkSheetRange", PyGtkSheetRange_New, 1 },
     { "GtkPlotLine", PyGtkPlotLine_New, 1 },
     { "gtk_sheet_new", _wrap_gtk_sheet_new, 1 },
-    { "gtk_sheet_get_entry", _wrap_gtk_sheet_get_entry, 1 },
-    { "gtk_sheet_get_entry_widget", _wrap_gtk_sheet_get_entry_widget, 1 },
     { "gtk_sheet_get_visible_range", _wrap_gtk_sheet_get_visible_range, 1 },
     { "gtk_sheet_clip_range", _wrap_gtk_sheet_clip_range, 1 },
-    { "gtk_sheet_get_vadjustment", _wrap_gtk_sheet_get_vadjustment, 1 },
-    { "gtk_sheet_get_hadjustment", _wrap_gtk_sheet_get_hadjustment, 1 },
     { "gtk_sheet_select_range", _wrap_gtk_sheet_select_range, 1 },
     { "gtk_sheet_get_active_cell", _wrap_gtk_sheet_get_active_cell, 1 },
     { "gtk_sheet_cell_get_text", _wrap_gtk_sheet_cell_get_text, 1 },
@@ -3850,8 +3751,6 @@ static PyMethodDef _gtkextraMethods[] =
     { "gtk_plot3d_minor_grids_visible", _wrap_gtk_plot3d_minor_grids_visible, 1 },
     { "gtk_plot3d_major_zgrid_get_attributes", _wrap_gtk_plot3d_major_zgrid_get_attributes, 1 },
     { "gtk_plot3d_minor_zgrid_get_attributes", _wrap_gtk_plot3d_minor_zgrid_get_attributes, 1 },
-    { "gtk_plot_canvas_get_active_plot", _wrap_gtk_plot_canvas_get_active_plot, 1 },
-    { "gtk_plot_canvas_get_active_data", _wrap_gtk_plot_canvas_get_active_data, 1 },
     { "gtk_plot_canvas_get_active_point", _wrap_gtk_plot_canvas_get_active_point, 1 },
     { "gtk_plot_canvas_get_active_item", _wrap_gtk_plot_canvas_get_active_item, 1 },
     { "gtk_plot_canvas_get_pixel", _wrap_gtk_plot_canvas_get_pixel, 1 },
