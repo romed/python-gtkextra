@@ -1,3 +1,8 @@
+2002-02-12  Andreas Voegele  <voegelas@users.sourceforge.net>
+
+	* setup.py: gtkextra-config is now called in addition to
+	gtk-config.
+
 2002-01-04  Andreas Voegele  <voegelas@users.sourceforge.net>
 
 	* examples/testiterator.py:
