@@ -25,8 +25,8 @@ def filteropt(s, opts):
     list.append(args)
     return list
 
-gtk_cflags = commands.getoutput("gtk-config --cflags")
-gtk_libs = commands.getoutput("gtk-config --libs")
+gtk_cflags = commands.getoutput("gtkextra-config --cflags") + " " + commands.getoutput("gtk-config --cflags")
+gtk_libs = commands.getoutput("gtkextra-config --libs") + " " + commands.getoutput("gtk-config --libs")
 
 (include_dirs, extra_compile_args) = filteropt(gtk_cflags, "I")
 (library_dirs, libraries, extra_link_args) = filteropt(gtk_libs, "Ll")
