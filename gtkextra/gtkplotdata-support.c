@@ -203,14 +203,10 @@ pygtkextra_plot_data_call_plot_function(GtkPlot *plot, GtkPlotData *data,
     args = vector[1];
 
     /* Put the X value into the first item of the argument tuple. */
-    /*
     value = PyFloat_FromDouble(x);
     if (!value)
 	goto cleanup;
     PyTuple_SetItem(args, 0, value);
-    */
-    value = PyTuple_GET_ITEM(args, 0);
-    ((PyFloatObject *) value)->ob_fval = x;
 
     /* Call the Python function. */
     result = PyEval_CallObject(function, args);
@@ -270,7 +266,6 @@ pygtkextra_plot_data_call_plot3d_function(GtkPlot *plot, GtkPlotData *data,
     args = vector[1];
 
     /* Put the X and Y value into the first two items of the argument tuple. */
-    /*
     value = PyFloat_FromDouble(x);
     if (!value)
 	goto cleanup;
@@ -279,11 +274,6 @@ pygtkextra_plot_data_call_plot3d_function(GtkPlot *plot, GtkPlotData *data,
     if (!value)
 	goto cleanup;
     PyTuple_SetItem(args, 1, value);
-    */
-    value = PyTuple_GET_ITEM(args, 0);
-    ((PyFloatObject *) value)->ob_fval = x;
-    value = PyTuple_GET_ITEM(args, 1);
-    ((PyFloatObject *) value)->ob_fval = y;
 
     /* Call the Python function. */
     result = PyEval_CallObject(function, args);
@@ -349,14 +339,10 @@ pygtkextra_plot_data_call_plot_iterator(GtkPlot *plot, GtkPlotData *data,
     args = vector[1];
 
     /* Put the index into the first item of the argument tuple. */
-    /*
     value = PyInt_FromLong(iter);
     if (!value)
 	goto cleanup;
     PyTuple_SetItem(args, 0, value);
-    */
-    value = PyTuple_GET_ITEM(args, 0);
-    ((PyIntObject *) value)->ob_ival = iter;
 
     /* Call the Python function. */
     result = PyEval_CallObject(function, args);
