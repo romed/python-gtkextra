@@ -4,3 +4,5 @@
 
 * The GtkPlot signal "tick_label" is not supported since it uses
   GTK_TYPE_POINTER.
+
+* Support the GtkPlotDT widget.
