@@ -1,0 +1,84 @@
+New in 0.21:
+* The bindings are now a package, ie gtkextra/__init__.py is used
+  instead of gtkextra.py.  Please remove the old files before the
+  the new files are installed.
+
+New in 0.20:
+* The bindings are now built and installed with the Python
+  Distribution Utilities.  Read the document "Installing Python
+  Modules" that comes with Python for more information about the
+  Distutils.
+* GtkCheckItem is now an alias for the standard GtkCheckButton.
+
+New in 0.19:
+* Added the GtkPlotData subclass GtkPlotPixmap.  See testpixmap.py for
+  more information.
+* Added the GtkCharSelection dialog.
+* Added the attribute GtkFontCombo.psfont.
+
+New in 0.18:
+* Requires gtk+extra-0.99.16.
+* Added GtkPlot.set_background_pixmap(), set_transparent(),
+  is_transparent().
+* Removed GtkPlot.plot_set_flags(), plot_unset_flags() and
+  PLOT_TRANSPARENT.  Use GtkPlot.set_transparent() instead.
+* Added GtkPlot.grids_set_on_top() and grids_on_top().
+* Added PLOT_BAR_POINTS, PLOT_BAR_RELATIVE, PLOT_BAR_ABSOLUTE.
+* Added GtkPlotCSurface.set_lines_only(), lines_only(),
+  set_labels_visible() and labels_visible().
+* Added GtkPlotFlux.center() and is_centered().
+* Added GtkPlotText.set_border().
+* Added GtkPlotCanvas.put_pixmap() and PLOT_CANVAS_PIXMAP.
+* GtkFileList.open_dir() now returns a boolean value indicating
+  success or failure.
+* Added GtkFileList.get_filetype(), add_type() and add_type_filter().
+* Added GtkIconFileSelection.show_tree().  Note: Use show() instead of
+  show_all() to manage a GtkIconFileSelection dialog.  If the dialog
+  is managed with show_all() the tree widget, that is now disabled by
+  default, will be shown and the GtkExtra code won't work correctly.
+* Added GtkIconList.add_from_pixmap().
+* Added the attributes GtkPSFont.i18n_latinfamily and vertical.
+* Added the function psfont_add_i18n_font().
+* Applied a patch from Joe Van Andel that fixes a Numerical Python
+  problem.
+
+New in 0.17:
+* Updated GtkPlot.put_text() and GtkPlotCanvas.put_text().  The angle
+  must now be put after the font height in the argument list.  In
+  previous versions the angle had to be put before the font name.
+* Renamed all *_get_visible() functions to *_visible().  The old
+  Pythons methods are still available though.
+* GtkPlot.get_pixel() and GtkPlot3D.get_pixel() now return floating
+  point values instead of integers.
+* Added GtkPlot.clip_data().  If the method's argument is TRUE the
+  plot data is clipped to fit the frame.
+* GtkPlot.draw_line() now gets floating point values instead of
+  integers.
+* Updated GtkPlot.axis_set_attributes(), axis_get_attributes(),
+  axis_set_ticks_width(), y0line_set_attributes(),
+  x0line_set_attributes, major_vgrid_set_attributes(),
+  minor_vgrid_set_attributes(), major_hgrid_set_attributes() and
+  minor_hgrid_set_attributes().  The width is now a floating point
+  value.
+* Updated GtkPlot.axis_title_set_attributes().  The method now gets
+  the transparency and the justification as additional arguments.
+* Renamed GtkPlot.axis_labels_set_attributes() to
+  axis_set_labels_attributes().  The method now gets the transparency
+  and the justification as additional arguments.
+* Renamed GtkPlot.axis_labels_set_numbers() to
+  axis_set_labels_numbers().
+* Removed GtkPlot.axis_set_tick_labels().  Custom labels are now set
+  with the signal "tick_label". Note: This signal is not supported by
+  the Python bindings since the signal "tick_label" uses
+  GTK_TYPE_POINTER.
+* Added GtkPlot.axis_set_labels_suffix(), axis_set_labels_prefix(),
+  axis_get_labels_suffix() and axis_get_labels_prefix().
+* Updated GtkPlot3D.corner_set_attributes(), corner_get_attributes(),
+  frame_set_attributes(), frame_get_attributes() and
+  axis_set_ticks_width().  The width is now a floating point value.
+* Added GtkIconFileSelection.show_hidden() and set_filter().
+* Added GtkIconList.set_mode(), get_mode(), set_editable(),
+  is_editable(), set_row_spacing(), get_row_spacing(),
+  set_col_spacing(), get_col_spacing(), set_text_space(),
+  get_text_space(), set_icon_border(), get_icon_border(),
+  set_icon_width() and get_icon_width().

@@ -1,0 +1,5 @@
+include AUTHORS COPYING ChangeLog INSTALL MANIFEST.in NEWS README THANKS TODO
+graft codegen
+graft examples
+graft gtkextra
+global-exclude *~ *.py[co] *.ps

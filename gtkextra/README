@@ -1,0 +1,40 @@
+Some notes for maintainers
+
+Please don't use Python 2.x specific code as long as PyGTK doesn't
+require Python 2.x!
+
+Always make sure that optional features are enabled by default.  For
+example, use "#ifndef WITHOUT_NUMPY" instead of "#ifdef WITH_NUMPY"!
+
+If a GtkExtra function is changed or added the following files have to
+be edited:
+
+* __init__.py
+* gtkextra.defs
+* gtkextra-extrafuncs.defs
+
+For PyGTK 0.6.x:
+
+* gtkextramodule.c
+
+  Generate "gtkextramodule_defs.h" and "gtkextramodule_impl.h" with
+  "python ../codegen/mkgtkextra.py".
+
+For PyGTK2:
+
+* gtkextra.override
+
+If a GtkExtra type is changed or added the following files have to be
+edited:
+
+* <type name>-type.c
+* pygtkextra-private.h
+* pygtkextra.h
+
+Some types require additional code that is placed in:
+
+* <type name>-support.c
+
+Common code is placed in:
+
+* gtkextra-support.c

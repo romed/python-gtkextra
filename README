@@ -1,0 +1,42 @@
+Welcome to the Python bindings for GtkExtra!
+
+GtkExtra  is a  set of  widgets for  the GIMP  Toolkit, aka  GTK+. It
+provides  a spreadsheet-like matrix  widget, widgets  for 2-D  and 3-D
+graphing and  several other widgets.  GtkExtra's home  page is located
+at http://gtkextra.sourceforge.net/.
+
+The Python bindings for GtkExtra  allow you to use the GtkExtra widget
+set in  programs written  in the powerful  object-oriented programming
+language Python.  Look at http://www.python.org/ for information about
+Python.
+
+The Python  bindings for GtkExtra  require Numerical Python,  which is
+available  at http://numpy.sourceforge.net/, and  PyGTK, which  can be
+found at http://www.daa.com.au/~james/pygtk/.
+
+All parts  of the Python bindings  for GtkExtra are put  under the GNU
+Lesser General Public  License; either version 2.1 of  the License, or
+(at your option) any later version.
+
+You  should have  received a  copy of  the GNU  Lesser  General Public
+License along with this program in  the file COPYING; if not, write to
+the  Free  Software Foundation,  Inc.,  59  Temple  Place, Suite  330,
+Boston, MA 02111-1307 USA.
+
+The bindings' documentation is based on the  GtkAda documentation and
+used by permission.  GtkAda  is available at http://gtkada.eu.org/ and
+copyrighted by Emmanuel Briot, Joel Brobecker and Arnaud Charlet.
+
+Please read the file INSTALL for installation instructions.
+
+The  newest version  of the  Python  bindings is  always available  at
+http://python-gtkextra.sourceforge.net/.
+
+If  you   want  to  contact   the  author  send  electronic   mail  to
+<voegelas@users.sourceforge.net>  or paper  mail  to Andreas  Voegele,
+Gartenstr. 13, 71106 Magstadt, Germany.
+
+Local variables:
+default-justification: full
+fill-column: 70
+End:

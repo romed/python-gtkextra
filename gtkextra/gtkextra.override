@@ -1,0 +1,3637 @@
+/* -*- Mode: C; c-basic-offset: 4 -*- */
+%%
+headers
+#include <gtkextra/gtkextra.h>
+#include "pygtkextra-private.h"
+
+/* Fixes */
+#define GTK_ICON_FILE_SELECTION GTK_ICON_FILESEL
+#define gtk_combo_box_get_type gtk_combobox_get_type
+#define gtk_combo_box_new gtk_combobox_new
+#define gtk_combo_box_hide_popdown_window gtk_combobox_hide_popdown_window
+
+%%
+override gtk_sheet_new kwargs
+static PyObject *
+_wrap_gtk_sheet_new(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "rows", "columns", "title", "entry_type",
+			      "editable", NULL };
+    GtkWidget *widget;
+    int rows, columns;
+    char *title = NULL;
+    PyObject *entry_type = Py_None;
+    int editable = TRUE;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii|zOi:GtkSheet.__init__",
+				     kwlist, &rows, &columns, &title,
+				     &entry_type, &editable))
+        return NULL;
+    if (editable) {
+	if (entry_type == Py_None) {
+	    widget = gtk_sheet_new(rows, columns, title);
+	} else {
+	    if (!PyInt_Check(entry_type)) {
+		PyErr_SetString(PyExc_TypeError, "entry_type must be integer");
+		return NULL;
+	    }
+	    widget =
+		gtk_sheet_new_with_custom_entry(rows, columns, title,
+						(GtkType)
+						PyInt_AS_LONG(entry_type));
+	}
+    } else {
+	widget = gtk_sheet_new_browser(rows, columns, title);
+    }
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkSheet object");
+	return NULL;
+    }
+    gtk_signal_connect(GTK_OBJECT(widget), "destroy",
+		       GTK_SIGNAL_FUNC(pygtkextra_sheet_destroy_cb), NULL);
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+ignore gtk_sheet_new_browser
+%%
+ignore gtk_sheet_new_with_custom_entry
+%%
+override gtk_sheet_get_visible_range
+static PyObject *
+_wrap_gtk_sheet_get_visible_range(PyGtk_Object *self, PyObject *args)
+{
+    GtkSheetRange range;
+
+    if (!PyArg_ParseTuple(args, ":GtkSheet.get_visible_range"))
+        return NULL;
+    gtk_sheet_get_visible_range(GTK_SHEET(self->obj), &range);
+    return pygtkextra_sheet_range_new(&range);
+}
+%%
+override gtk_sheet_clip_range kwargs
+static PyObject *
+_wrap_gtk_sheet_clip_range(PyGtk_Object *self, PyObject *args,
+			   PyObject *kwargs)
+{
+    static char *kwlist[] = { "range", NULL };
+    GtkSheetRange range, *rangep = &range;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii):GtkSheet.clip_range", kwlist,
+				     &range.row0, &range.col0, &range.rowi,
+				     &range.coli)) {
+	PyObject *arg;
+	
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "O:GtkSheet.clip_range", kwlist,
+					  &arg)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    gtk_sheet_clip_range(GTK_SHEET(self->obj), rangep);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_select_range kwargs
+static PyObject *
+_wrap_gtk_sheet_select_range(PyGtk_Object *self, PyObject *args,
+			     PyObject *kwargs)
+{
+    static char *kwlist[] = { "range", NULL };
+    GtkSheetRange range, *rangep = &range;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii):GtkSheet.select_range", kwlist,
+				     &range.row0, &range.col0, &range.rowi,
+				     &range.coli)) {
+	PyObject *arg;
+	
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "O:GtkSheet.select_range", kwlist,
+					  &arg)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    gtk_sheet_select_range(GTK_SHEET(self->obj), rangep);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_get_active_cell
+static PyObject *
+_wrap_gtk_sheet_get_active_cell(PyGtk_Object *self, PyObject *args)
+{
+    gint row, column;
+
+    if (!PyArg_ParseTuple(args, ":GtkSheet.get_active_cell"))
+        return NULL;
+    gtk_sheet_get_active_cell(GTK_SHEET(self->obj), &row, &column);
+    if (row < 0 || column < 0) {
+	Py_INCREF(Py_None);
+	return Py_None;
+    }
+    return Py_BuildValue("(ii)", (int) row, (int) column);
+}
+%%
+override gtk_sheet_cell_get_text kwargs
+static PyObject *
+_wrap_gtk_sheet_cell_get_text(PyGtk_Object *self, PyObject *args,
+			      PyObject *kwargs)
+{
+    static char *kwlist[] = { "row", "column", NULL };
+    int row, column;
+    char *s;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii:GtkSheet.cell_get_text",
+				     kwlist, &row, &column))
+        return NULL;
+    s = gtk_sheet_cell_get_text(GTK_SHEET(self->obj), row, column);
+    return PyString_FromString((s) ? s : "");
+}
+%%
+override gtk_sheet_range_clear kwargs
+static PyObject *
+_wrap_gtk_sheet_range_clear(PyGtk_Object *self, PyObject *args,
+			    PyObject *kwargs)
+{
+    static char *kwlist[] = { "range", NULL };
+    GtkSheetRange range, *rangep = &range;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii):GtkSheet.range_clear", kwlist,
+				     &range.row0, &range.col0, &range.rowi,
+				     &range.coli)) {
+	PyObject *arg;
+	
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "O:GtkSheet.range_clear", kwlist,
+					  &arg)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    gtk_sheet_range_clear(GTK_SHEET(self->obj), rangep);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_range_delete kwargs
+static PyObject *
+_wrap_gtk_sheet_range_delete(PyGtk_Object *self, PyObject *args,
+			     PyObject *kwargs)
+{
+    static char *kwlist[] = { "range", NULL };
+    GtkSheetRange range, *rangep = &range;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii):GtkSheet.range_delete", kwlist,
+				     &range.row0, &range.col0, &range.rowi,
+				     &range.coli)) {
+	PyObject *arg;
+	
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "O:GtkSheet.range_delete", kwlist,
+					  &arg)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    /* If a range is deleted the reference count of all objects linked
+       to cells in the given range must be decremented. */
+    pygtkextra_sheet_unref_links(GTK_SHEET(self->obj), rangep);
+    gtk_sheet_range_delete(GTK_SHEET(self->obj), rangep);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_link_cell kwargs
+static PyObject *
+_wrap_gtk_sheet_link_cell(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "row", "column", "object", NULL };
+    int row, column;
+    PyObject *object;
+    gpointer link;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "iiO:GtkSheet.link_cell",
+				     kwlist, &row, &column, &object))
+        return NULL;
+    if (object == Py_None)
+	link = NULL;
+    else {
+	Py_INCREF(object);
+	link = (gpointer) object;
+    }
+    /* If a new object is linked to the cell the reference count of the old
+       object must be decremented. */
+    object = (PyObject *)
+	gtk_sheet_get_link(GTK_SHEET(self->obj), row, column);
+    Py_XDECREF(object);
+    gtk_sheet_link_cell(GTK_SHEET(self->obj), row, column, link);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_get_link kwargs
+static PyObject *
+_wrap_gtk_sheet_get_link(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "row", "column", NULL };
+    int row, column;
+    PyObject *object;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii:GtkSheet.get_link",
+				     kwlist, &row, &column))
+        return NULL;
+    object = (PyObject *) gtk_sheet_get_link(GTK_SHEET(self->obj), row,
+					     column);
+    if (!object)
+	object = Py_None;
+    Py_INCREF(object);
+    return object;
+}
+%%
+override gtk_sheet_remove_link kwargs
+static PyObject *
+_wrap_gtk_sheet_remove_link(PyGtk_Object *self, PyObject *args,
+			    PyObject *kwargs)
+{
+    static char *kwlist[] = { "row", "column", NULL };
+    int row, column;
+    PyObject *object;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii:GtkSheet.remove_link",
+				     kwlist, &row, &column))
+        return NULL;
+    /* The reference count of the removed object must be decremented. */
+    object = (PyObject *) gtk_sheet_get_link(GTK_SHEET(self->obj), row,
+					     column);
+    Py_XDECREF(object);
+    gtk_sheet_remove_link(GTK_SHEET(self->obj), row, column);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_get_pixel_info kwargs
+static PyObject *
+_wrap_gtk_sheet_get_pixel_info(PyGtk_Object *self, PyObject *args,
+			       PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", NULL };
+    int x, y;
+    gint row, column;
+    
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "ii:GtkSheet.get_pixel_info", kwlist,
+				     &x, &y))
+        return NULL;
+    if (!gtk_sheet_get_pixel_info(GTK_SHEET(self->obj), x, y, &row, &column)) {
+	/* Like gtk_clist_get_selection_info() this function returns
+	   None if you click outside of the cells. */
+	Py_INCREF(Py_None);
+	return Py_None;
+    }
+    return Py_BuildValue("(ii)", (int) row, (int) column);
+}
+%%
+override gtk_sheet_get_cell_area kwargs
+static PyObject *
+_wrap_gtk_sheet_get_cell_area(PyGtk_Object *self, PyObject *args,
+			      PyObject *kwargs)
+{
+    static char *kwlist[] = { "row", "column", NULL };
+    int row, column;
+    GdkRectangle area;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii:GtkSheet.get_cell_area",
+				     kwlist, &row, &column))
+        return NULL;
+    if (!gtk_sheet_get_cell_area(GTK_SHEET(self->obj), row, column, &area)) {
+	PyErr_SetString(PyExc_ValueError, "out of bounds");
+	return NULL;
+    }
+    return Py_BuildValue("(iiii)", (int) area.x, (int) area.y,
+			 (int) area.width, (int) area.height);
+}
+%%
+override gtk_sheet_range_set_background kwargs
+static PyObject *
+_wrap_gtk_sheet_range_set_background(PyGtk_Object *self, PyObject *args,
+				     PyObject *kwargs)
+{
+    static char *kwlist[] = { "range", "color", NULL };
+    GtkSheetRange range, *rangep = &range;
+    PyObject *py_color;
+    GdkColor *color;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii)O:GtkSheet.range_set_background",
+				     kwlist, &range.row0, &range.col0,
+				     &range.rowi, &range.coli, &py_color)) {
+	PyObject *arg;
+
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "OO:GtkSheet.range_set_background",
+					  kwlist, &arg, &py_color)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    if (PyGdkColor_Check(py_color))
+        color = PyGdkColor_Get(py_color);
+    else if (py_color == Py_None)
+	color = NULL;
+    else {
+        PyErr_SetString(PyExc_TypeError,
+			"color argument must be a GdkColor or None");
+	return NULL;
+    }
+    gtk_sheet_range_set_background(GTK_SHEET(self->obj), rangep, color);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_range_set_foreground kwargs
+static PyObject *
+_wrap_gtk_sheet_range_set_foreground(PyGtk_Object *self, PyObject *args,
+				     PyObject *kwargs)
+{
+    static char *kwlist[] = { "range", "color", NULL };
+    GtkSheetRange range, *rangep = &range;
+    PyObject *py_color;
+    GdkColor *color;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii)O:GtkSheet.range_set_foreground",
+				     kwlist, &range.row0, &range.col0,
+				     &range.rowi, &range.coli, &py_color)) {
+	PyObject *arg;
+
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "OO:GtkSheet.range_set_foreground",
+					  kwlist, &arg, &py_color)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    if (PyGdkColor_Check(py_color))
+        color = PyGdkColor_Get(py_color);
+    else if (py_color == Py_None)
+	color = NULL;
+    else {
+        PyErr_SetString(PyExc_TypeError,
+			"color argument must be a GdkColor or None");
+	return NULL;
+    }
+    gtk_sheet_range_set_foreground(GTK_SHEET(self->obj), rangep, color);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_range_set_justification kwargs
+static PyObject *
+_wrap_gtk_sheet_range_set_justification(PyGtk_Object *self, PyObject *args,
+					PyObject *kwargs)
+{
+    static char *kwlist[] = { "range", "justification", NULL };
+    GtkSheetRange range, *rangep = &range;
+    int justification;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii)i:"\
+				     "GtkSheet.range_set_justification",
+				     kwlist, &range.row0, &range.col0,
+				     &range.rowi, &range.coli,
+				     &justification)) {
+	PyObject *arg;
+
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "Oi:"\
+					  "GtkSheet.range_set_justification",
+					  kwlist, &arg, &justification)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    gtk_sheet_range_set_justification(GTK_SHEET(self->obj), rangep,
+				      justification);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_range_set_editable kwargs
+static PyObject *
+_wrap_gtk_sheet_range_set_editable(PyGtk_Object *self, PyObject *args,
+				   PyObject *kwargs)
+{
+    static char *kwlist[] = { "range", "editable", NULL };
+    GtkSheetRange range, *rangep = &range;
+    int editable;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii)i:GtkSheet.range_set_editable",
+				     kwlist, &range.row0, &range.col0,
+				     &range.rowi, &range.coli, &editable)) {
+	PyObject *arg;
+
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "Oi:GtkSheet.range_set_editable",
+					  kwlist, &arg, &editable)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    gtk_sheet_range_set_editable(GTK_SHEET(self->obj), rangep, editable);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_range_set_visible kwargs
+static PyObject *
+_wrap_gtk_sheet_range_set_visible(PyGtk_Object *self, PyObject *args,
+				  PyObject *kwargs)
+{
+    static char *kwlist[] = { "range", "visible", NULL };
+    GtkSheetRange range, *rangep = &range;
+    int visible;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii)i:GtkSheet.range_set_visible",
+				     kwlist, &range.row0, &range.col0,
+				     &range.rowi, &range.coli, &visible)) {
+	PyObject *arg;
+
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "Oi:GtkSheet.range_set_visible",
+					  kwlist, &arg, &visible)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    gtk_sheet_range_set_visible(GTK_SHEET(self->obj), rangep, visible);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_range_set_border kwargs
+static PyObject *
+_wrap_gtk_sheet_range_set_border(PyGtk_Object *self, PyObject *args,
+				 PyObject *kwargs)
+{
+    static char *kwlist[] = { "range", "mask", "width", "line_style", NULL };
+    GtkSheetRange range, *rangep = &range;
+    int mask, width, line_style = GDK_LINE_SOLID;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii)ii|i:GtkSheet.range_set_border",
+				     kwlist, &range.row0, &range.col0,
+				     &range.rowi, &range.coli, &mask, &width,
+				     &line_style)) {
+	PyObject *arg;
+
+	line_style = GDK_LINE_SOLID;
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "Oii|i:GtkSheet.range_set_border",
+					  kwlist, &arg, &mask, &width,
+					  &line_style)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    gtk_sheet_range_set_border(GTK_SHEET(self->obj), rangep, mask, width,
+			       line_style);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_range_set_border_color kwargs
+static PyObject *
+_wrap_gtk_sheet_range_set_border_color(PyGtk_Object *self, PyObject *args,
+				       PyObject *kwargs)
+{
+    static char *kwlist[] = { "range", "color", NULL };
+    GtkSheetRange range, *rangep = &range;
+    PyObject *py_color;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii)O!:"\
+				     "GtkSheet.range_set_border_color",
+				     kwlist, &range.row0, &range.col0,
+				     &range.rowi, &range.coli,
+				     &PyGdkColor_Type, &py_color)) {
+	PyObject *arg;
+
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "OO!:"\
+					  "GtkSheet.range_set_border_color",
+					  kwlist, &arg, &PyGdkColor_Type,
+					  &py_color)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    gtk_sheet_range_set_border_color(GTK_SHEET(self->obj), rangep,
+				     PyGdkColor_Get(py_color));
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_range_set_font kwargs
+static PyObject *
+_wrap_gtk_sheet_range_set_font(PyGtk_Object *self, PyObject *args,
+			       PyObject *kwargs)
+{
+    /* The Python program has to keep a reference to the font object! */
+    static char *kwlist[] = { "range", "font", NULL };
+    GtkSheetRange range, *rangep = &range;
+    PyObject *py_font;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(iiii)O!:GtkSheet.range_set_font",
+				     kwlist, &range.row0, &range.col0,
+				     &range.rowi, &range.coli,
+				     &PyGdkFont_Type, &py_font)) {
+	PyObject *arg;
+
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs,
+					  "OO!:GtkSheet.range_set_font",
+					  kwlist, &arg, &PyGdkFont_Type,
+					  &py_font)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "range argument must be 4-sequence or None");
+	    return NULL;
+	}
+	
+	rangep = NULL;
+    }
+    /* The Python program will crash if it doesn't keep a reference to the
+       GdkFont object. */
+    gtk_sheet_range_set_font(GTK_SHEET(self->obj), rangep,
+			     PyGdkFont_Get(py_font));
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_get_attributes kwargs
+static PyObject *
+_wrap_gtk_sheet_get_attributes(PyGtk_Object *self, PyObject *args,
+			       PyObject *kwargs)
+{
+    static char *kwlist[] = { "row", "column", NULL };
+    int row, column;
+    gboolean is_allocated;
+    GtkSheetCellAttr attributes;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "ii:GtkSheet.get_attributes", kwlist,
+				     &row, &column))
+        return NULL;
+    if (row < 0 || column < 0) {
+	PyErr_SetString(PyExc_ValueError, "out of bounds");
+	return NULL;
+    }
+    is_allocated = gtk_sheet_get_attributes(GTK_SHEET(self->obj), row, column,
+					    &attributes);
+    /* In Python the GtkSheetCellAttr type has an additional attribute that is
+       called "is_allocated". */
+    return pygtkextra_sheet_cell_attr_new(&attributes, is_allocated);
+}
+%%
+override gtk_sheet_put kwargs
+static PyObject *
+_wrap_gtk_sheet_put(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "widget", "x", "y", NULL };
+    PyObject *widget;
+    int x, y;
+    GtkSheetChild *child;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oii:GtkSheet.put", kwlist,
+				     &widget, &x, &y))
+        return NULL;
+    if (!PyGtk_Check(widget)) {
+	PyErr_SetString(PyExc_TypeError,
+			"widget argument should be a GtkWidget");
+	return NULL;
+    }
+    child = gtk_sheet_put(GTK_SHEET(self->obj), GTK_WIDGET(PyGtk_Get(widget)),
+			  x, y);
+    if (!child) {
+	PyErr_SetString(PyExc_RuntimeError, "cannot put child into sheet");
+	return NULL;
+    }
+    return pygtkextra_sheet_child_new(child);
+}
+%%
+override gtk_sheet_get_child_at kwargs
+static PyObject *
+_wrap_gtk_sheet_get_child_at(PyGtk_Object *self, PyObject *args,
+			     PyObject *kwargs)
+{
+    static char *kwlist[] = { "row", "column", NULL };
+    int row, column;
+    GtkSheetChild *child;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii:GtkSheet.get_child_at",
+				     kwlist, &row, &column))
+        return NULL;
+    child = gtk_sheet_get_child_at(GTK_SHEET(self->obj), row, column);
+    return pygtkextra_sheet_child_new(child);
+}
+%%
+override gtk_sheet_get_column_title kwargs
+static PyObject *
+_wrap_gtk_sheet_get_column_title(PyGtk_Object *self, PyObject *args,
+				 PyObject *kwargs)
+{
+    static char *kwlist[] = { "column", NULL };
+    int column;
+    char *title;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "i:GtkSheet.get_column_title", kwlist,
+				     &column))
+        return NULL;
+    if (column < 0
+	|| column >= gtk_sheet_get_columns_count(GTK_SHEET(self->obj))) {
+	PyErr_SetString(PyExc_ValueError, "out of bounds");
+	return NULL;
+    }
+    title = GTK_SHEET(self->obj)->column[column].name;
+    if (title)
+	return PyString_FromString(title);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_get_row_title kwargs
+static PyObject *
+_wrap_gtk_sheet_get_row_title(PyGtk_Object *self, PyObject *args,
+			      PyObject *kwargs)
+{
+    static char *kwlist[] = { "row", NULL };
+    int row;
+    char *title;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:GtkSheet.get_row_title",
+				     kwlist, &row))
+        return NULL;
+    if (row < 0 || row >= gtk_sheet_get_rows_count(GTK_SHEET(self->obj))) {
+	PyErr_SetString(PyExc_ValueError, "out of bounds");
+	return NULL;
+    }
+    title = GTK_SHEET(self->obj)->row[row].name;
+    if (title)
+	return PyString_FromString(title);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_sheet_get_column_width kwargs
+static PyObject *
+_wrap_gtk_sheet_get_column_width(PyGtk_Object *self, PyObject *args)
+{
+    static char *kwlist[] = { "column", NULL };
+    int column;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "i:GtkSheet.get_column_width", kwlist,
+				     &column))
+        return NULL;
+    if (column < 0
+	|| column >= gtk_sheet_get_columns_count(GTK_SHEET(self->obj))) {
+	PyErr_SetString(PyExc_ValueError, "out of bounds");
+	return NULL;
+    }
+    return PyInt_FromLong(GTK_SHEET(self->obj)->column[column].width);
+}
+%%
+override gtk_sheet_get_row_height kwargs
+static PyObject *
+_wrap_gtk_sheet_get_row_height(PyGtk_Object *self, PyObject *args)
+{
+    static char *kwlist[] = { "row", NULL };
+    int row;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:GtkSheet.get_row_height",
+				     kwlist, &row))
+        return NULL;
+    if (row < 0 || row >= gtk_sheet_get_rows_count(GTK_SHEET(self->obj))) {
+	PyErr_SetString(PyExc_ValueError, "out of bounds");
+	return NULL;
+    }
+    return PyInt_FromLong(GTK_SHEET(self->obj)->row[row].height);
+}
+%%
+override gtk_sheet_get_range
+static PyObject *
+_wrap_gtk_sheet_get_range(PyGtk_Object *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkSheet.get_range"))
+        return NULL;
+    return pygtkextra_sheet_range_new(&(GTK_SHEET(self->obj)->range));
+}
+%%
+override gtk_plot_data_new
+static PyObject *
+_wrap_gtk_plot_data_new(PyGtk_Object *self, PyObject *args)
+{
+    GtkWidget *widget;
+    int num_args;
+
+    num_args = PyTuple_Size(args);
+    if (num_args < 1) {
+	widget = gtk_plot_data_new();
+    } else {
+	PyObject *function;
+
+	function = PyTuple_GetItem(args, 0);
+	if (PyCallable_Check(function)) {
+	    PyObject *extra;
+
+	    extra = PyTuple_GetSlice(args, 1, num_args);
+	    if (!extra)
+		return NULL;
+	    widget =
+		gtk_plot_data_new_function(pygtkextra_plot_data_call_plot_function);
+	    if (widget)
+		pygtkextra_plot_data_register_plot_function(GTK_PLOT_DATA(widget),
+							    function, extra);
+	    Py_DECREF(extra);
+	} else if (PyCObject_Check(function)) {
+	    if (num_args > 1) {
+		PyErr_SetString(PyExc_TypeError,
+				"cannot pass extra arguments to C function");
+		return NULL;
+	    }
+	    widget = gtk_plot_data_new_function((GtkPlotFunc)
+						PyCObject_AsVoidPtr(function));
+	} else {
+	    PyErr_SetString(PyExc_TypeError,
+			    "function argument must be callable");
+	    return NULL;
+	}
+    }
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkPlotData object");
+	return NULL;
+    }
+    gtk_signal_connect(GTK_OBJECT(widget), "destroy",
+		       GTK_SIGNAL_FUNC(pygtkextra_plot_data_destroy_cb), NULL);
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+ignore gtk_plot_data_new_function
+%%
+override gtk_plot_data_set_points kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_points(PyGtk_Object *self, PyObject *args,
+			       PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", "dx", "dy", "n", NULL };
+    PyObject *x, *y, *dx = Py_None, *dy = Py_None;
+    int n = -1;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "OO|OOi:GtkPlotData.set_points", kwlist,
+				     &x, &y, &dx, &dy, &n))
+        return NULL;
+    return pygtkextra_plot_data_set_points(GTK_PLOT_DATA(self->obj),
+					   x, y, dx, dy, n);
+}
+%%
+override gtk_plot_data_get_points
+static PyObject *
+_wrap_gtk_plot_data_get_points(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_points"))
+        return NULL;
+    return pygtkextra_plot_data_get_points(GTK_PLOT_DATA(self->obj));
+}
+%%
+override gtk_plot_data_set_numpoints kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_numpoints(PyObject *self, PyObject *args,
+				  PyObject *kwargs)
+{
+    static char *kwlist[] = { "n", NULL };
+    int n;
+
+    if (!PyArg_ParseTuple(args, "i:GtkPlotData.set_numpoints", &n))
+        return NULL;
+    return pygtkextra_plot_data_set_numpoints(GTK_PLOT_DATA(self->obj), n);
+}
+%%
+override gtk_plot_data_set_x kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_x(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotData.set_x",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_data_set_array(GTK_PLOT_DATA(self->obj), 0, array);
+}
+%%
+override gtk_plot_data_set_y kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_y(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotData.set_y",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_data_set_array(GTK_PLOT_DATA(self->obj), 1, array);
+}
+%%
+override gtk_plot_data_set_z kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_z(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotData.set_z",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_data_set_array(GTK_PLOT_DATA(self->obj), 2, array);
+}
+%%
+override gtk_plot_data_set_a kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_a(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotData.set_a",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_data_set_array(GTK_PLOT_DATA(self->obj), 3, array);
+}
+%%
+override gtk_plot_data_set_dx kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_dx(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotData.set_dx",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_data_set_array(GTK_PLOT_DATA(self->obj), 4, array);
+}
+%%
+override gtk_plot_data_set_dy kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_dy(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotData.set_dy",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_data_set_array(GTK_PLOT_DATA(self->obj), 5, array);
+}
+%%
+override gtk_plot_data_set_dz kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_dz(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotData.set_dz",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_data_set_array(GTK_PLOT_DATA(self->obj), 6, array);
+}
+%%
+override gtk_plot_data_set_da kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_da(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotData.set_da",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_data_set_array(GTK_PLOT_DATA(self->obj), 7, array);
+}
+%%
+override gtk_plot_data_get_x
+static PyObject *
+_wrap_gtk_plot_data_get_x(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_x"))
+        return NULL;
+    return pygtkextra_plot_data_get_array(GTK_PLOT_DATA(self->obj), 0);
+}
+%%
+override gtk_plot_data_get_y
+static PyObject *
+_wrap_gtk_plot_data_get_y(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_y"))
+        return NULL;
+    return pygtkextra_plot_data_get_array(GTK_PLOT_DATA(self->obj), 1);
+}
+%%
+override gtk_plot_data_get_z
+static PyObject *
+_wrap_gtk_plot_data_get_z(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_z"))
+        return NULL;
+    return pygtkextra_plot_data_get_array(GTK_PLOT_DATA(self->obj), 2);
+}
+%%
+override gtk_plot_data_get_a
+static PyObject *
+_wrap_gtk_plot_data_get_a(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_a"))
+        return NULL;
+    return pygtkextra_plot_data_get_array(GTK_PLOT_DATA(self->obj), 3);
+}
+%%
+override gtk_plot_data_get_dx
+static PyObject *
+_wrap_gtk_plot_data_get_dx(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_dx"))
+        return NULL;
+    return pygtkextra_plot_data_get_array(GTK_PLOT_DATA(self->obj), 4);
+}
+%%
+override gtk_plot_data_get_dy
+static PyObject *
+_wrap_gtk_plot_data_get_dy(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_dy"))
+        return NULL;
+    return pygtkextra_plot_data_get_array(GTK_PLOT_DATA(self->obj), 5);
+}
+%%
+override gtk_plot_data_get_dz
+static PyObject *
+_wrap_gtk_plot_data_get_dz(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_dz"))
+        return NULL;
+    return pygtkextra_plot_data_get_array(GTK_PLOT_DATA(self->obj), 6);
+}
+%%
+override gtk_plot_data_get_da
+static PyObject *
+_wrap_gtk_plot_data_get_da(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_da"))
+        return NULL;
+    return pygtkextra_plot_data_get_array(GTK_PLOT_DATA(self->obj), 7);
+}
+%%
+override gtk_plot_data_set_labels kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_labels(PyObject *self, PyObject *args,
+			       PyObject *kwargs)
+{
+    static char *kwlist[] = { "labels", NULL };
+    PyObject *labels;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotData.set_labels",
+				     kwlist, &labels))
+        return NULL;
+    return pygtkextra_plot_data_set_labels(GTK_PLOT_DATA(self->obj), labels);
+}
+%%
+override gtk_plot_data_get_labels
+static PyObject *
+_wrap_gtk_plot_data_get_labels(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_labels"))
+        return NULL;
+    return pygtkextra_plot_data_get_labels(GTK_PLOT_DATA(self->obj));
+}
+%%
+override gtk_plot_data_set_symbol kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_symbol(PyObject *self, PyObject *args)
+{
+    static char *kwlist[] = { "symbol_type", "symbol_style", "size",
+			      "line_width", "color", "border_color", NULL };
+    int symbol_type, symbol_style, size, line_width;
+    PyObject *color, *border_color = Py_None;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "iiiiO!|O:GtkPlotData.set_symbol",
+				     kwlist, &symbol_type, &symbol_style,
+				     &size, &line_width,
+				     &PyGdkColor_Type, &color, &border_color))
+        return NULL;
+    if (border_color == Py_None) {
+	border_color = color;
+    } else if (!PyGdkColor_Check(border_color)) {
+	PyErr_SetString(PyExc_TypeError,
+			"border_color argument must be a GdkColor or None");
+    }
+    gtk_plot_data_set_symbol(GTK_PLOT_DATA(self->obj), symbol_type,
+			     symbol_style, size, line_width,
+			     PyGdkColor_Get(color),
+			     PyGdkColor_Get(border_color));
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_data_get_symbol
+static PyObject *
+_wrap_gtk_plot_data_get_symbol(PyObject *self, PyObject *args)
+{
+    gint size;
+    gfloat line_width;
+    GtkPlotSymbolType symbol_type;
+    GtkPlotSymbolStyle symbol_style;
+    GdkColor color, border_color;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_symbol"))
+	return NULL;
+    gtk_plot_data_get_symbol(GTK_PLOT_DATA(self->obj), &symbol_type,
+			     &symbol_style, &size, &line_width, &color,
+			     &border_color);
+    return Py_BuildValue("(iiidNN)", (int) symbol_type, (int) symbol_style,
+			 (int) size, (double) line_width,
+			 PyGdkColor_New(&color),
+			 PyGdkColor_New(&border_color));
+}
+%%
+override gtk_plot_data_get_line_attributes
+static PyObject *
+_wrap_gtk_plot_data_get_line_attributes(PyObject *self, PyObject *args)
+{
+    GtkPlotLineStyle line_style;
+    gfloat line_width;
+    GdkColor line_color;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_line_attributes"))
+	return NULL;
+    gtk_plot_data_get_line_attributes(GTK_PLOT_DATA(self->obj),
+				      &line_style, &line_width, &line_color);
+    return pygtkextra_plot_line_new(line_style, line_width, &line_color);
+}
+%%
+override gtk_plot_data_get_gradient_colors
+static PyObject *
+_wrap_gtk_plot_data_get_gradient_colors(PyObject *self, PyObject *args)
+{
+    GdkColor min_color, max_color;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_gradient_colors"))
+	return NULL;
+    gtk_plot_data_get_gradient_colors(GTK_PLOT_DATA(self->obj),
+				      &min_color, &max_color);
+    return Py_BuildValue("(NN)", PyGdkColor_New(&min_color),
+			 PyGdkColor_New(&max_color));
+}
+%%
+override gtk_plot_data_get_gradient
+static PyObject *
+_wrap_gtk_plot_data_get_gradient(PyObject *self, PyObject *args)
+{
+    gdouble min, max;
+    gint levels;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_gradient"))
+	return NULL;
+    gtk_plot_data_get_gradient(GTK_PLOT_DATA(self->obj), &min, &max, &levels);
+    return Py_BuildValue("(ddi)", (double) min, (double) max, (int) levels);
+}
+%%
+override gtk_plot_data_get_gradient_level kwargs
+static PyObject *
+_wrap_gtk_plot_data_get_gradient_level(PyObject *self, PyObject *args,
+				       PyObject *kwargs)
+{
+    static char *kwlist[] = { "level", NULL };
+    int level;
+    GdkColor color;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "i:GtkPlotData.get_gradient", kwlist,
+				     &level))
+	return NULL;
+    gtk_plot_data_get_gradient_level(GTK_PLOT_DATA(self->obj), level, &color);
+    return PyGdkColor_New(&color);
+}
+%%
+override gtk_plot_data_set_link kwargs
+static PyObject *
+_wrap_gtk_plot_data_set_link(PyObject *self, PyObject *args)
+{
+    static char *kwlist[] = { "object", NULL };
+    PyObject *object;
+    gpointer link;
+    
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotData.set_link",
+				     kwlist, &object))
+	return NULL;
+    Py_INCREF(object);
+    if (object == Py_None)
+	link = NULL;
+    else {
+	Py_INCREF(object);
+	link = (gpointer) object;
+    }
+     /* If a new object is linked to the cell the reference count of the old
+       object must be decremented. */
+    object = (PyObject *)
+	gtk_plot_data_get_link(GTK_PLOT_DATA(self->obj));
+    Py_XDECREF(object);
+    gtk_plot_data_set_link(GTK_PLOT_DATA(self->obj), link);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_data_get_link
+static PyObject *
+_wrap_gtk_plot_data_get_link(PyObject *self, PyObject *args)
+{
+    PyObject *object;
+    
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.get_link"))
+	return NULL;
+    object = (PyObject *) gtk_plot_data_get_link(GTK_PLOT_DATA(self->obj));
+    if (!object)
+	object = Py_None;
+    Py_INCREF(object);
+    return object;
+}
+%%
+override gtk_plot_data_remove_link
+static PyObject *
+_wrap_gtk_plot_data_remove_link(PyObject *self, PyObject *args)
+{
+    PyObject *object;
+    
+    if (!PyArg_ParseTuple(args, ":GtkPlotData.remove_link"))
+	return NULL;
+    /* The reference count of the removed object must be decremented. */
+    object = (PyObject *) gtk_plot_data_get_link(GTK_PLOT_DATA(self->obj));
+    Py_XDECREF(object);
+    gtk_plot_data_remove_link(GTK_PLOT_DATA(self->obj));
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_bar_new kwargs
+static PyObject *
+_wrap_gtk_plot_bar_new(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "orientation", NULL };
+    GtkWidget *widget;
+    int orientation = GTK_ORIENTATION_VERTICAL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i:GtkPlotBar.__init__",
+				     kwlist, &orientation))
+        return NULL;
+    widget = gtk_plot_bar_new(orientation);
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError, "cannot create GtkPlotBar object");
+	return NULL;
+    }
+    gtk_signal_connect(GTK_OBJECT(widget), "destroy",
+		       GTK_SIGNAL_FUNC(pygtkextra_plot_data_destroy_cb), NULL);
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_box_new kwargs
+static PyObject *
+_wrap_gtk_plot_box_new(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "orientation", NULL };
+    GtkWidget *widget;
+    int orientation = GTK_ORIENTATION_VERTICAL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i:GtkPlotBox.__init__",
+				     kwlist, &orientation))
+        return NULL;
+    widget = gtk_plot_box_new(orientation);
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError, "cannot create GtkPlotBox object");
+	return NULL;
+    }
+    gtk_signal_connect(GTK_OBJECT(widget), "destroy",
+		       GTK_SIGNAL_FUNC(pygtkextra_plot_data_destroy_cb), NULL);
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_flux_new
+static PyObject *
+_wrap_gtk_plot_flux_new(PyObject *self, PyObject *args)
+{
+    GtkWidget *widget;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlotFlux.__init__"))
+        return NULL;
+    widget = gtk_plot_flux_new();
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkPlotFlux object");
+	return NULL;
+    }
+    gtk_signal_connect(GTK_OBJECT(widget), "destroy",
+		       GTK_SIGNAL_FUNC(pygtkextra_plot_data_destroy_cb), NULL);
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_flux_get_arrow
+static PyObject *
+_wrap_gtk_plot_flux_get_arrow(PyObject *self, PyObject *args)
+{
+    gint arrow_length, arrow_width;
+    GtkPlotSymbolStyle symbol_style;
+    
+    if (!PyArg_ParseTuple(args, ":GtkPlotFlux.get_arrow"))
+	return NULL;
+    gtk_plot_flux_get_arrow(GTK_PLOT_FLUX(self->obj), &arrow_length,
+			    &arrow_width, &symbol_style);
+    return Py_BuildValue("(iii)", (int) arrow_length, (int) arrow_width,
+			 (int) symbol_style);
+}
+%%
+override gtk_plot_surface_new kwargs
+static PyObject *
+_wrap_gtk_plot_surface_new(PyObject *self, PyObject *args)
+{
+    GtkWidget *widget;
+    int num_args;
+
+    num_args = PyTuple_Size(args);
+    if (num_args < 1) {
+	widget = gtk_plot_surface_new();
+    } else {
+	PyObject *function;
+
+	function = PyTuple_GetItem(args, 0);
+	if (PyCallable_Check(function)) {
+	    PyObject *extra;
+
+	    extra = PyTuple_GetSlice(args, 1, num_args);
+	    if (!extra)
+		return NULL;
+	    widget =
+		gtk_plot_surface_new_function(pygtkextra_plot_data_call_plot3d_function);
+	    if (widget)
+		pygtkextra_plot_data_register_plot3d_function(GTK_PLOT_DATA(widget),
+							      function, extra);
+	    Py_DECREF(extra);
+	} else if (PyCObject_Check(function)) {
+	    if (num_args > 1) {
+		PyErr_SetString(PyExc_TypeError,
+				"cannot pass extra arguments to C function");
+		return NULL;
+	    }
+	    widget =
+		gtk_plot_surface_new_function((GtkPlotFunc)
+					      PyCObject_AsVoidPtr(function));
+	} else {
+	    PyErr_SetString(PyExc_TypeError,
+			    "function argument must be callable");
+	    return NULL;
+	}
+    }
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkPlotSurface object");
+	return NULL;
+    }
+    gtk_signal_connect(GTK_OBJECT(widget), "destroy",
+		       GTK_SIGNAL_FUNC(pygtkextra_plot_data_destroy_cb), NULL);
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+ignore gtk_plot_surface_new_function
+%%
+override gtk_plot_surface_set_points kwargs
+static PyObject *
+_wrap_gtk_plot_surface_set_points(PyObject *self, PyObject *args,
+				  PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", "z", "dx", "dy", "dz", "nx", "ny",
+			      NULL };
+    PyObject *x, *y, *z, *dx, *dy, *dz;
+    int nx, ny;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "OOOOOOii:GtkPlotSurface.set_points",
+				     kwlist, &x, &y, &z, &dx, &dy, &dz, &nx,
+				     &ny))
+        return NULL;
+    return pygtkextra_plot_surface_set_points(GTK_PLOT_SURFACE(self->obj),
+					      x, y, z, dx, dy, dz, nx, ny);
+}
+%%
+override gtk_plot_surface_get_points
+static PyObject *
+_wrap_gtk_plot_surface_get_points(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotSurface.get_points"))
+        return NULL;
+    return pygtkextra_plot_surface_get_points(GTK_PLOT_SURFACE(self->obj));
+}
+%%
+override gtk_plot_surface_set_nx kwargs
+static PyObject *
+_wrap_gtk_plot_surface_set_nx(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "nx", NULL };
+    int nx;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:GtkPlotSurface.set_nx",
+				     kwlist, &nx))
+        return NULL;
+    return pygtkextra_plot_surface_set_nx(GTK_PLOT_SURFACE(self->obj), nx);
+}
+%%
+override gtk_plot_surface_set_ny kwargs
+static PyObject *
+_wrap_gtk_plot_surface_set_ny(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "ny", NULL };
+    int ny;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:GtkPlotSurface.set_ny",
+				     kwlist, &ny))
+        return NULL;
+    return pygtkextra_plot_surface_set_ny(GTK_PLOT_SURFACE(self->obj), ny);
+}
+%%
+override gtk_plot_surface_set_x kwargs
+static PyObject *
+_wrap_gtk_plot_surface_set_x(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotSurface.set_x",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_surface_set_array(GTK_PLOT_SURFACE(self->obj),
+					     0, array);
+}
+%%
+override gtk_plot_surface_set_y kwargs
+static PyObject *
+_wrap_gtk_plot_surface_set_y(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotSurface.set_y",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_surface_set_array(GTK_PLOT_SURFACE(self->obj),
+					     1, array);
+}
+%%
+override gtk_plot_surface_set_z kwargs
+static PyObject *
+_wrap_gtk_plot_surface_set_z(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotSurface.set_z",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_surface_set_array(GTK_PLOT_SURFACE(self->obj),
+					     2, array);
+}
+%%
+override gtk_plot_surface_set_dx kwargs
+static PyObject *
+_wrap_gtk_plot_surface_set_dx(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotSurface.set_dx",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_surface_set_array(GTK_PLOT_SURFACE(self->obj),
+					     4, array);
+}
+%%
+override gtk_plot_surface_set_dy kwargs
+static PyObject *
+_wrap_gtk_plot_surface_set_dy(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotSurface.set_dy",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_surface_set_array(GTK_PLOT_SURFACE(self->obj),
+					     5, array);
+}
+%%
+override gtk_plot_surface_set_dz kwargs
+static PyObject *
+_wrap_gtk_plot_surface_set_dz(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "array", NULL };
+    PyObject *array;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlotSurface.set_dz",
+				     kwlist, &array))
+        return NULL;
+    return pygtkextra_plot_surface_set_array(GTK_PLOT_SURFACE(self->obj),
+					     6, array);
+}
+%%
+override gtk_plot_surface_get_x
+static PyObject *
+_wrap_gtk_plot_surface_get_x(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotSurface.get_x"))
+        return NULL;
+    return pygtkextra_plot_surface_get_array(GTK_PLOT_SURFACE(self->obj), 0);
+}
+%%
+override gtk_plot_surface_get_y
+static PyObject *
+_wrap_gtk_plot_surface_get_y(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotSurface.get_y"))
+        return NULL;
+    return pygtkextra_plot_surface_get_array(GTK_PLOT_SURFACE(self->obj), 1);
+}
+%%
+override gtk_plot_surface_get_z
+static PyObject *
+_wrap_gtk_plot_surface_get_z(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotSurface.get_z"))
+        return NULL;
+    return pygtkextra_plot_surface_get_array(GTK_PLOT_SURFACE(self->obj), 2);
+}
+%%
+override gtk_plot_surface_get_dx
+static PyObject *
+_wrap_gtk_plot_surface_get_dx(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotSurface.get_dx"))
+        return NULL;
+    return pygtkextra_plot_surface_get_array(GTK_PLOT_SURFACE(self->obj), 4);
+}
+%%
+override gtk_plot_surface_get_dy
+static PyObject *
+_wrap_gtk_plot_surface_get_dy(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotSurface.get_dy"))
+        return NULL;
+    return pygtkextra_plot_surface_get_array(GTK_PLOT_SURFACE(self->obj), 5);
+}
+%%
+override gtk_plot_surface_get_dz
+static PyObject *
+_wrap_gtk_plot_surface_get_dz(PyObject *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkPlotSurface.get_dz"))
+        return NULL;
+    return pygtkextra_plot_surface_get_array(GTK_PLOT_SURFACE(self->obj), 6);
+}
+%%
+override gtk_plot_csurface_new kwargs
+static PyObject *
+_wrap_gtk_plot_csurface_new(PyObject *self, PyObject *args)
+{
+    GtkWidget *widget;
+    int num_args;
+
+    num_args = PyTuple_Size(args);
+    if (num_args < 1) {
+	widget = gtk_plot_csurface_new();
+    } else {
+	PyObject *function;
+
+	function = PyTuple_GetItem(args, 0);
+	if (PyCallable_Check(function)) {
+	    PyObject *extra;
+
+	    extra = PyTuple_GetSlice(args, 1, num_args);
+	    if (!extra)
+		return NULL;
+	    widget =
+		gtk_plot_csurface_new_function(pygtkextra_plot_data_call_plot3d_function);
+	    if (widget)
+		pygtkextra_plot_data_register_plot3d_function(GTK_PLOT_DATA(widget),
+							      function, extra);
+	    Py_DECREF(extra);
+	} else if (PyCObject_Check(function)) {
+	    if (num_args > 1) {
+		PyErr_SetString(PyExc_TypeError,
+				"cannot pass extra arguments to C function");
+		return NULL;
+	    }
+	    widget =
+		gtk_plot_csurface_new_function((GtkPlotFunc)
+					       PyCObject_AsVoidPtr(function));
+	} else {
+	    PyErr_SetString(PyExc_TypeError,
+			    "function argument must be callable");
+	    return NULL;
+	}
+    }
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkPlotCSurface object");
+	return NULL;
+    }
+    gtk_signal_connect(GTK_OBJECT(widget), "destroy",
+		       GTK_SIGNAL_FUNC(pygtkextra_plot_data_destroy_cb), NULL);
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+ignore gtk_plot_csurface_new_function
+%%
+override gtk_plot_pixmap_new kwargs
+static PyObject *
+_wrap_gtk_plot_pixmap_new(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "pixmap", "mask", NULL };
+    GtkWidget *widget;
+    PyObject *py_pixmap, *py_mask = Py_None;
+    GdkBitmap *mask = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "O|O:GtkPlotPixmap.__init__", kwlist,
+				     &py_pixmap, &py_mask))
+        return NULL;
+    if (!PyGdkWindow_Check(py_pixmap)) {
+        PyErr_SetString(PyExc_TypeError,
+			"pixmap argument must be a GdkPixmap");
+	return NULL;
+    }
+    if (PyGdkWindow_Check(py_mask))
+	mask = PyGdkWindow_Get(py_mask);
+    else if (py_mask != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"mask argument must be a GdkBitmap or None");
+	return NULL;
+    }
+    widget = gtk_plot_pixmap_new(PyGdkWindow_Get(py_pixmap), mask);
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkPlotPixmap object");
+	return NULL;
+    }
+    gtk_signal_connect(GTK_OBJECT(widget), "destroy",
+		       GTK_SIGNAL_FUNC(pygtkextra_plot_data_destroy_cb), NULL);
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_new kwargs
+static PyObject *
+_wrap_gtk_plot_new(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "drawable", "width", "height", NULL };
+    GtkWidget *widget;
+    PyObject *py_drawable = Py_None;
+    PyObject *py_width = Py_None, *py_height = Py_None;
+    GdkDrawable *drawable = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|OOO:GtkPlot.__init__",
+				     kwlist, &py_drawable, &py_width,
+				     &py_height))
+        return NULL;
+    if (PyGdkWindow_Check(py_drawable))
+        drawable = PyGdkWindow_Get(py_drawable);
+    else if (py_drawable != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"drawable argument must be a GdkDrawable or None");
+	return NULL;
+    }
+    if (py_width == Py_None && py_height == Py_None) {
+	widget = gtk_plot_new(drawable);
+    } else {
+	PyObject *value;
+	double width, height;
+
+	if (PyNumber_Check(py_width)
+	    && (value = PyNumber_Float(py_width))) {
+	    width = PyFloat_AS_DOUBLE(value);
+	    Py_DECREF(value);
+	} else {
+	    PyErr_SetString(PyExc_TypeError,
+			    "width argument must be a number");
+	    return NULL;
+	}
+	
+	if (PyNumber_Check(py_height)
+	    && (value = PyNumber_Float(py_height))) {
+	    height = PyFloat_AS_DOUBLE(value);
+	    Py_DECREF(value);
+	} else {
+	    PyErr_SetString(PyExc_TypeError,
+			    "height argument must be a number");
+	    return NULL;
+	}
+	
+	widget = gtk_plot_new_with_size(drawable, width, height);
+    }
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError, "cannot create GtkPlot object");
+	return NULL;
+    }
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+ignore gtk_plot_new_with_size
+%%
+override gtk_plot_get_position
+static PyObject *
+_wrap_gtk_plot_get_position(PyGtk_Object *self, PyObject *args)
+{
+    gdouble x, y;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlot.get_position"))
+        return NULL;
+    gtk_plot_get_position(GTK_PLOT(self->obj), &x, &y);
+    return Py_BuildValue("(dd)", (double) x, (double) y);
+}
+%%
+override gtk_plot_get_size
+static PyObject *
+_wrap_gtk_plot_get_size(PyGtk_Object *self, PyObject *args)
+{
+    gdouble width, height;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlot.get_size"))
+        return NULL;
+    gtk_plot_get_size(GTK_PLOT(self->obj), &width, &height);
+    return Py_BuildValue("(dd)", (double) width, (double) height);
+}
+%%
+override gtk_plot_get_internal_allocation
+static PyObject *
+_wrap_gtk_plot_get_internal_allocation(PyGtk_Object *self, PyObject *args)
+{
+    GtkAllocation allocation;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlot.get_internal_allocation"))
+        return NULL;
+    allocation = gtk_plot_get_internal_allocation(GTK_PLOT(self->obj));
+    return Py_BuildValue("(iiii)", (int) allocation.x, (int) allocation.y,
+			 (int) allocation.width, (int) allocation.height);
+}
+%%
+override gtk_plot_refresh kwargs
+static PyObject *
+_wrap_gtk_plot_refresh(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "area", NULL };
+    int x, y, width, height;
+    GdkRectangle area, *areap = &area;
+
+    if (PyArg_ParseTupleAndKeywords(args, kwargs, "(iiii):GtkPlot.refresh",
+				    kwlist, &x, &y, &width, &height)) {
+	area.x = x;
+	area.y = y;
+	area.width = width;
+	area.height = height;
+    } else {
+	PyObject *arg = Py_None;
+	
+	PyErr_Clear();
+	if (!(PyArg_ParseTupleAndKeywords(args, kwargs, "|O:GtkPlot.refresh",
+			       &PyGtk_Type, &obj, &arg)
+	      && arg == Py_None)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "area argument must be 4-sequence or None");
+	    return NULL;
+	}
+
+	areap = NULL;
+    }
+    gtk_plot_refresh(GTK_PLOT(self->obj), areap);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_get_pixel kwargs
+static PyObject *
+_wrap_gtk_plot_get_pixel(PyGtk_Object *self, PyObject *args,
+			 PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", NULL };
+    double x, y;
+    gdouble out_x, out_y;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "dd:GtkPlot.get_pixel",
+				     kwlist, &x, &y))
+        return NULL;
+    gtk_plot_get_pixel(GTK_PLOT(self->obj), x, y, &out_x, &out_y);
+    return Py_BuildValue("(dd)", (double) out_x, (double) out_y);
+}
+%%
+override gtk_plot_get_point kwargs
+static PyObject *
+_wrap_gtk_plot_get_point(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", NULL };
+    int x, y;
+    gdouble out_x, out_y;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ii:GtkPlot.get_point",
+				     kwlist, &x, &y))
+        return NULL;
+    gtk_plot_get_point(GTK_PLOT(self->obj), x, y, &out_x, &out_y);
+    return Py_BuildValue("(dd)", (double) out_x, (double) out_y);
+}
+%%
+override gtk_plot_get_xrange
+static PyObject *
+_wrap_gtk_plot_get_xrange(PyGtk_Object *self, PyObject *args)
+{
+    gdouble xmin, xmax;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlot.get_xrange"))
+        return NULL;
+    gtk_plot_get_xrange(GTK_PLOT(self->obj), &xmin, &xmax);
+    return Py_BuildValue("(dd)", (double) xmin, (double) xmax);
+}
+%%
+override gtk_plot_get_yrange
+static PyObject *
+_wrap_gtk_plot_get_yrange(PyGtk_Object *self, PyObject *args)
+{
+    gdouble ymin, ymax;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlot.get_yrange"))
+        return NULL;
+    gtk_plot_get_yrange(GTK_PLOT(self->obj), &ymin, &ymax);
+    return Py_BuildValue("(dd)", (double) ymin, (double) ymax);
+}
+%%
+override gtk_plot_put_text kwargs
+static PyObject *
+_wrap_gtk_plot_put_text(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", "fontname", "height", "angle",
+			      "foreground", "background", "transparent",
+			      "justification", "string", NULL };
+    PyObject *py_foreground = Py_None, *py_background = Py_None;
+    char *fontname, *string;
+    GdkColor *foreground = NULL, *background = NULL;
+    double x, y;
+    int angle, height, transparent, justification;
+    GtkPlotText *text;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "ddziiOOiiz:GtkPlot.put_text", kwlist,
+				     &x, &y, &fontname, &height, &angle,
+				     &py_foreground, &py_background,
+				     &transparent, &justification, &string))
+        return NULL;
+    if (PyGdkColor_Check(py_foreground))
+        foreground = PyGdkColor_Get(py_foreground);
+    else if (py_foreground != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"foreground argument must be a GdkColor or None");
+	return NULL;
+    }
+    if (PyGdkColor_Check(py_background))
+        background = PyGdkColor_Get(py_background);
+    else if (py_background != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"background argument must be a GdkColor or None");
+	return NULL;
+    }
+    text = gtk_plot_put_text(GTK_PLOT(self->obj), x, y, fontname, height,
+			     angle, foreground, background, transparent,
+			     justification, string);
+    return pygtkextra_plot_text_new(text);
+}
+%%
+override gtk_plot_remove_text kwargs
+static PyObject *
+_wrap_gtk_plot_remove_text(PyGtk_Object *self, PyObject *args,
+			   PyObject *kwargs)
+{
+    static char *kwlist[] = { "text", NULL };
+    PyObject *text;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlot.remove_text",
+				     kwlist, &text))
+        return NULL;
+    if (!PyGtkPlotText_Check(text)) {
+        PyErr_SetString(PyExc_TypeError,
+			"text argument must be a GtkPlotText");
+	return NULL;
+    }
+    return PyInt_FromLong(gtk_plot_remove_text(GTK_PLOT(self->obj),
+					       PyGtkPlotText_Get(text)));
+}
+%%
+override gtk_plot_draw_line kwargs
+static PyObject *
+_wrap_gtk_plot_draw_line(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "line", "x1", "y1", "x2", "y2", NULL };
+    int line_style;
+    float line_width;
+    double x1, y1, x2, y2;
+    PyObject *py_line_color;
+    GtkPlotLine line;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(ifO!)dddd:GtkPlot.draw_line",
+				     kwlist, &line_style, &line_width,
+				     &PyGdkColor_Type, &py_line_color,
+				     &x1, &y1, &x2, &y2))
+        return NULL;
+    line.line_style = line_style;
+    line.line_width = line_width;
+    line.color = *PyGdkColor_Get(py_line_color);
+    gtk_plot_draw_line(GTK_PLOT(self->obj), line, x1, y1, x2, y2);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_draw_text kwargs
+static PyObject *
+_wrap_gtk_plot_draw_text(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "text", NULL };
+    PyObject *text;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlot.draw_text",
+				     kwlist, &text))
+        return NULL;
+    if (!PyGtkPlotText_Check(text)) {
+        PyErr_SetString(PyExc_TypeError,
+			"text argument must be a GtkPlotText");
+	return NULL;
+    }
+    gtk_plot_draw_text(GTK_PLOT(self->obj), *PyGtkPlotText_Get(text));
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_axis_get_attributes kwargs
+static PyObject *
+_wrap_gtk_plot_axis_get_attributes(PyGtk_Object *self, PyObject *args,
+				   PyObject *kwargs)
+{
+    static char *kwlist[] = { "axis", NULL };
+    int axis;
+    gfloat width;
+    GdkColor color;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "i:GtkPlot.axis_get_attributes", kwlist,
+				     &axis))
+        return NULL;
+    gtk_plot_axis_get_attributes(GTK_PLOT(self->obj), axis, &width, &color);
+    return Py_BuildValue("(dN)", (double) width, PyGdkColor_New(&color));
+}
+%%
+override gtk_plot_grids_visible
+static PyObject *
+_wrap_gtk_plot_grids_visible(PyGtk_Object *self, PyObject *args)
+{
+    gboolean vmajor, vminor, hmajor, hminor;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlot.grids_visible"))
+        return NULL;
+    gtk_plot_grids_visible(GTK_PLOT(self->obj), &vmajor, &vminor, &hmajor,
+			   &hminor);
+    return Py_BuildValue("(iiii)", (int) vmajor, (int) vminor, (int) hmajor,
+			 (int) hminor);
+}
+%%
+override gtk_plot_legends_get_position
+static PyObject *
+_wrap_gtk_plot_legends_get_position(PyGtk_Object *self, PyObject *args)
+{
+    gdouble x, y;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlot.legends_get_position"))
+        return NULL;
+    gtk_plot_legends_get_position(GTK_PLOT(self->obj), &x, &y);
+    return Py_BuildValue("(dd)", (double) x, (double) y);
+}
+%%
+override gtk_plot_legends_get_allocation
+static PyObject *
+_wrap_gtk_plot_legends_get_allocation(PyGtk_Object *self, PyObject *args)
+{
+    GtkAllocation allocation;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlot.legends_get_allocation"))
+        return NULL;
+    allocation = gtk_plot_legends_get_allocation(GTK_PLOT(self->obj));
+    return Py_BuildValue("(iiii)", (int) allocation.x, (int) allocation.y,
+			 (int) allocation.width, (int) allocation.height);
+}
+%%
+override gtk_plot_set_line_attributes kwargs
+static PyObject *
+_wrap_gtk_plot_set_line_attributes(PyObject *self, PyObject *args,
+				   PyObject *kwargs)
+{
+    static char *kwlist1[] = { "line", NULL };
+    int line_style;
+    float line_width;
+    PyObject *py_line_color;
+    GtkPlotLine line;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(ifO!):GtkPlot.set_line_attributes",
+				     &line_style, &line_width,
+				     &PyGdkColor_Type, &py_line_color))
+        return NULL;
+    line.line_style = line_style;
+    line.line_width = line_width;
+    line.color = *PyGdkColor_Get(py_line_color);
+    gtk_plot_set_line_attributes(GTK_PLOT(self->obj), line);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_add_data kwargs
+static PyObject *
+_wrap_gtk_plot_add_data(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "data", NULL };
+    PyObject *data;
+    
+    if (!(PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlot.add_data",
+				      kwlist, &data)))
+	return NULL;
+    if (!PyGtk_Check(data)) {
+	PyErr_SetString(PyExc_TypeError, "argument must be GtkPlotData");
+	return NULL;
+    }
+    gtk_plot_add_data(GTK_PLOT(self->obj), GTK_PLOT_DATA(PyGtk_Get(data)));
+    pygtkextra_plot_register_plot_data(GTK_PLOT(self->obj), data);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_remove_data kwargs
+static PyObject *
+_wrap_gtk_plot_remove_data(PyGtk_Object *self, PyObject *args,
+			   PyObject *kwargs)
+{
+    static char *kwlist[] = { "data", NULL };
+    PyObject *data;
+    gint ok;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkPlot.remove_data",
+				     kwlist, &data))
+        return NULL;
+    if (!PyGtk_Check(data)) {
+	PyErr_SetString(PyExc_TypeError, "argument must be GtkPlotData");
+	return NULL;
+    }
+    ok = gtk_plot_remove_data(GTK_PLOT(self->obj),
+			      GTK_PLOT_DATA(PyGtk_Get(data)));
+    if (ok)
+	pygtkextra_plot_unregister_plot_data(GTK_PLOT(self->obj), data);
+    return PyInt_FromLong(ok);
+}
+%%
+override gtk_plot_add_function
+static PyObject *
+_wrap_gtk_plot_add_function(PyGtk_Object *self, PyObject *args)
+{
+    int num_args;
+    PyObject *function;
+    GtkPlotData *data;
+
+    num_args = PyTuple_Size(args);
+    if (num_args < 1) {
+	PyErr_SetString(PyExc_TypeError,
+			"GtkPlot.add_function requires at least one argument");
+	return NULL;
+    }
+    function = PyTuple_GetItem(args, 0);
+    if (PyCallable_Check(function)) {
+	PyObject *extra;
+	
+	extra = PyTuple_GetSlice(args, 1, num_args);
+	if (!extra)
+	    return NULL;
+	data = gtk_plot_add_function(GTK_PLOT(self->obj),
+				     pygtkextra_plot_data_call_plot_function);
+	if (data)
+	    pygtkextra_plot_data_register_plot_function(data, function, extra);
+	Py_DECREF(extra);
+    } else if (PyCObject_Check(function)) {
+	if (num_args > 1) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "cannot pass extra arguments to C function");
+	    return NULL;
+	}
+	data = gtk_plot_add_function(GTK_PLOT(self->obj), (GtkPlotFunc)
+				     PyCObject_AsVoidPtr(function));
+    } else {
+        PyErr_SetString(PyExc_TypeError, "function argument must be callable");
+        return NULL;
+    }
+    if (!data) {
+	PyErr_SetString(PyExc_RuntimeError, "cannot add plot function");
+	return NULL;
+    }
+    gtk_signal_connect(GTK_OBJECT(data), "destroy",
+		       GTK_SIGNAL_FUNC(pygtkextra_plot_data_destroy_cb), NULL);
+    return PyGtk_New(GTK_OBJECT(data));
+}
+%%
+override gtk_plot_export_ps kwargs
+static PyObject *
+_wrap_gtk_plot_export_ps(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "filename", "orientation", "eps", "paper_size",
+			      NULL };
+    char *filename, *locale;
+    int orientation = GTK_PLOT_PORTRAIT, eps = FALSE,
+	paper_size = GTK_PLOT_LETTER;
+    gboolean ok;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|iii:GtkPlot.export_ps",
+				     kwlist, &filename, &orientation, &eps,
+				     &paper_size))
+        return NULL;
+    /* Since the export function crashes if the export file cannot be
+       opened for writing, we have to check if it is possible to create
+       the file. */
+    if (pygtkextra_try_fopen(filename, "w") < 0)
+	return NULL;
+    locale = setlocale(LC_NUMERIC, NULL);
+    setlocale(LC_NUMERIC, "C");
+    ok = gtk_plot_export_ps(GTK_PLOT(self->obj), filename, orientation, eps,
+			    paper_size);
+    setlocale(LC_NUMERIC, locale);
+    return PyInt_FromLong(ok);
+}
+%%
+override gtk_plot_export_ps_with_size kwargs
+static PyObject *
+_wrap_gtk_plot_export_ps_with_size(PyGtk_Object *self, PyObject *args,
+				   PyObject *kwargs)
+{
+    static char *kwlist[] = { "filename", "orientation", "eps", "units",
+			      "width", "height", NULL };
+    char *filename, *locale;
+    int orientation = GTK_PLOT_PORTRAIT, eps = FALSE,
+	units = GTK_PLOT_PSPOINTS, width = GTK_PLOT_LETTER_W,
+	height = GTK_PLOT_LETTER_H;
+    gboolean ok;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "s|iiiii:GtkPlot.export_ps_with_size",
+				     kwlist, &filename, &orientation, &eps,
+				     &units, &width, &height))
+        return NULL;
+    /* Since the export function crashes if the export file cannot be
+       opened for writing, we have to check if it is possible to create
+       the file. */
+    if (pygtkextra_try_fopen(filename, "w") < 0)
+	return NULL;
+    locale = setlocale(LC_NUMERIC, NULL);
+    setlocale(LC_NUMERIC, "C");
+    ok = gtk_plot_export_ps_with_size(GTK_PLOT(self->obj), filename,
+				      orientation, eps, units, width, height);
+    setlocale(LC_NUMERIC, locale);
+    return PyInt_FromLong(ok);
+}
+%%
+override gtk_plot_polar_new kwargs
+static PyObject *
+_wrap_gtk_plot_polar_new(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "drawable", "width", "height", NULL };
+    GtkWidget *widget;
+    PyObject *py_drawable = Py_None;
+    PyObject *py_width = Py_None, *py_height = Py_None;
+    GdkDrawable *drawable = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "|OOO:GtkPlotPolar.__init__",
+				     kwlist, &py_drawable, &py_width,
+				     &py_height))
+        return NULL;
+    if (PyGdkWindow_Check(py_drawable))
+        drawable = PyGdkWindow_Get(py_drawable);
+    else if (py_drawable != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"drawable argument must be a GdkDrawable or None");
+	return NULL;
+    }
+    if (py_width == Py_None && py_height == Py_None) {
+	widget = gtk_plot_polar_new(drawable);
+    } else {
+	PyObject *value;
+	double width, height;
+
+	if (PyNumber_Check(py_width)
+	    && (value = PyNumber_Float(py_width))) {
+	    width = PyFloat_AS_DOUBLE(value);
+	    Py_DECREF(value);
+	} else {
+	    PyErr_SetString(PyExc_TypeError,
+			    "width argument must be a number");
+	    return NULL;
+	}
+	
+	if (PyNumber_Check(py_height)
+	    && (value = PyNumber_Float(py_height))) {
+	    height = PyFloat_AS_DOUBLE(value);
+	    Py_DECREF(value);
+	} else {
+	    PyErr_SetString(PyExc_TypeError,
+			    "height argument must be a number");
+	    return NULL;
+	}
+	
+	widget = gtk_plot_polar_new_with_size(drawable, width, height);
+    }
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkPlotPolar object");
+	return NULL;
+    }
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+ignore gtk_plot_polar_new_with_size
+%%
+override gtk_plot3d_new kwargs
+static PyObject *
+_wrap_gtk_plot3d_new(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "drawable", "width", "height", NULL };
+    GtkWidget *widget;
+    PyObject *py_drawable = Py_None;
+    PyObject *py_width = Py_None, *py_height = Py_None;
+    GdkDrawable *drawable = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|OOO:GtkPlot3D.__init__",
+				     kwlist, &py_drawable, &py_width,
+				     &py_height))
+        return NULL;
+    if (PyGdkWindow_Check(py_drawable))
+        drawable = PyGdkWindow_Get(py_drawable);
+    else if (py_drawable != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"drawable argument must be a GdkDrawable or None");
+	return NULL;
+    }
+    if (py_width == Py_None && py_height == Py_None) {
+	widget = gtk_plot3d_new(drawable);
+    } else {
+	PyObject *value;
+	double width, height;
+
+	if (PyNumber_Check(py_width)
+	    && (value = PyNumber_Float(py_width))) {
+	    width = PyFloat_AS_DOUBLE(value);
+	    Py_DECREF(value);
+	} else {
+	    PyErr_SetString(PyExc_TypeError,
+			    "width argument must be a number");
+	    return NULL;
+	}
+	
+	if (PyNumber_Check(py_height)
+	    && (value = PyNumber_Float(py_height))) {
+	    height = PyFloat_AS_DOUBLE(value);
+	    Py_DECREF(value);
+	} else {
+	    PyErr_SetString(PyExc_TypeError,
+			    "height argument must be a number");
+	    return NULL;
+	}
+	
+	widget = gtk_plot3d_new_with_size(drawable, width, height);
+    }
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkPlot3D object");
+	return NULL;
+    }
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+ignore gtk_plot3d_new_with_size
+%%
+override gtk_plot3d_rotate_vector kwargs
+static PyObject *
+_wrap_gtk_plot3d_rotate_vector(PyObject *self, PyObject *args,
+			       PyObject *kwargs)
+{
+    static char *kwlist[] = { "vector", "a1", "a2", "a3", NULL };
+    double x, y, z, a1, a2, a3;
+    GtkPlotVector vector;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(ddd)ddd:GtkPlot3D.rotate_vector",
+				     kwlist, &x, &y, &z, &a1, &a2, &a3))
+        return NULL;
+    vector.x = x;
+    vector.y = y;
+    vector.z = z;
+    gtk_plot3d_rotate_vector(GTK_PLOT3D(self->obj), &vector, a1, a2, a3);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot3d_get_pixel kwargs
+static PyObject *
+_wrap_gtk_plot3d_get_pixel(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", "z", NULL };
+    double x, y, z;
+    gdouble px, py, pz;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "(ddd)ddd:GtkPlot3D.get_pixel", kwlist,
+				     &x, &y, &z))
+        return NULL;
+    gtk_plot3d_get_pixel(GTK_PLOT3D(self->obj), x, y, z, &px, &py, &pz);
+    return Py_BuildValue("(ddd)", (double) px, (double) py, (double) pz);
+}
+%%
+override gtk_plot3d_corner_get_attributes
+static PyObject *
+_wrap_gtk_plot3d_corner_get_attributes(PyObject *self, PyObject *args)
+{
+    GtkPlotLineStyle line_style;
+    gfloat line_width;
+    GdkColor line_color;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlot3D.corner_get_attributes"))
+        return NULL;
+    gtk_plot3d_corner_get_attributes(GTK_PLOT3D(self->obj), &line_style,
+				     &line_width, &line_color);
+    return pygtkextra_plot_line_new(line_style, line_width, &line_color);
+}
+%%
+override gtk_plot3d_frame_get_attributes
+static PyObject *
+_wrap_gtk_plot3d_frame_get_attributes(PyObject *self, PyObject *args)
+{
+    GtkPlotLineStyle line_style;
+    gfloat line_width;
+    GdkColor line_color;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlot3D.frame_get_attributes"))
+        return NULL;
+    gtk_plot3d_frame_get_attributes(GTK_PLOT3D(self->obj), &line_style,
+				    &line_width, &line_color);
+    return pygtkextra_plot_line_new(line_style, line_width, &line_color);
+}
+%%
+override gtk_plot3d_major_grids_visible
+static PyObject *
+_wrap_gtk_plot3d_major_grids_visible(PyObject *self, PyObject *args)
+{
+    gboolean x, y, z;
+
+    if (!PyArg_ParseTuple(args, ":gtk_plot3d_major_grids_visible"))
+        return NULL;
+    gtk_plot3d_major_grids_visible(GTK_PLOT3D(self->obj), &x, &y, &z);
+    return Py_BuildValue("(iii)", (int) x, (int) y, (int) z);
+}
+%%
+override gtk_plot3d_minor_grids_visible
+static PyObject *
+_wrap_gtk_plot3d_minor_grids_visible(PyObject *self, PyObject *args)
+{
+    gboolean x, y, z;
+
+    if (!PyArg_ParseTuple(args, ":gtk_plot3d_minor_grids_visible"))
+        return NULL;
+    gtk_plot3d_minor_grids_visible(GTK_PLOT3D(self->obj), &x, &y, &z);
+    return Py_BuildValue("(iii)", (int) x, (int) y, (int) z);
+}
+%%
+override gtk_plot3d_major_zgrid_get_attributes
+static PyObject *
+_wrap_gtk_plot3d_major_zgrid_get_attributes(PyObject *self, PyObject *args)
+{
+    GtkPlotLineStyle line_style;
+    gfloat line_width;
+    GdkColor line_color;
+
+    if (!PyArg_ParseTuple(args, ":gtk_plot3d_major_zgrid_get_attributes"))
+        return NULL;
+    gtk_plot3d_major_zgrid_get_attributes(GTK_PLOT3D(self->obj),
+					  &line_style, &line_width,
+					  &line_color);
+    return pygtkextra_plot_line_new(line_style, line_width, &line_color);
+}
+%%
+override gtk_plot3d_minor_zgrid_get_attributes
+static PyObject *
+_wrap_gtk_plot3d_minor_zgrid_get_attributes(PyObject *self, PyObject *args)
+{
+    GtkPlotLineStyle line_style;
+    gfloat line_width;
+    GdkColor line_color;
+
+    if (!PyArg_ParseTuple(args, ":gtk_plot3d_minor_zgrid_get_attributes"))
+        return NULL;
+    gtk_plot3d_minor_zgrid_get_attributes(GTK_PLOT3D(self->obj),
+					  &line_style, &line_width,
+					  &line_color);
+    return pygtkextra_plot_line_new(line_style, line_width, &line_color);
+}
+%%
+override gtk_plot_canvas_get_active_point
+static PyObject *
+_wrap_gtk_plot_canvas_get_active_point(PyGtk_Object *self, PyObject *args)
+{
+    gint active_point;
+    gdouble x, y;
+    GtkPlotCanvas *canvas;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlotCanvas.get_active_point"))
+        return NULL;
+    /*
+    active_point =
+	gtk_plot_canvas_get_active_point(GTK_PLOT_CANVAS(self->obj), &x, &y);
+    */
+    canvas = GTK_PLOT_CANVAS(self->obj);
+    active_point = canvas->active_point;
+    if (active_point < 0) {
+	Py_INCREF(Py_None);
+	return Py_None;
+    }
+    x = canvas->active_data->x[active_point];
+    y = canvas->active_data->y[active_point];
+    return Py_BuildValue("(idd)", (int) active_point, (double) x, (double) y);
+}
+%%
+override gtk_plot_canvas_get_active_item
+static PyObject *
+_wrap_gtk_plot_canvas_get_active_item(PyGtk_Object *self, PyObject *args)
+{
+    GtkPlotCanvasChild *child;
+
+    if (!PyArg_ParseTuple(args, ":GtkPlotCanvas.get_active_item"))
+        return NULL;
+    child = gtk_plot_canvas_get_active_item(GTK_PLOT_CANVAS(self->obj));
+    return pygtkextra_plot_canvas_child_new(child);
+}
+%%
+override gtk_plot_canvas_get_pixel kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_get_pixel(PyGtk_Object *self, PyObject *args,
+				PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", NULL };
+    double x, y;
+    gint ix, iy;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "dd:GtkPlotCanvas.get_pixel", kwlist,
+				     &x, &y))
+        return NULL;
+    gtk_plot_canvas_get_pixel(GTK_PLOT_CANVAS(self->obj), x, y, &ix, &iy);
+    return Py_BuildValue("(ii)", (int) ix, (int) iy);
+}
+%%
+override gtk_plot_canvas_get_position kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_get_position(PyGtk_Object *self, PyObject *args,
+				   PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", NULL };
+    int ix, iy;
+    gdouble x, y;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "ii:GtkPlotCanvas.get_position", kwlist,
+				     &ix, &iy))
+        return NULL;
+    gtk_plot_canvas_get_position(GTK_PLOT_CANVAS(self->obj), ix, iy, &x, &y);
+    return Py_BuildValue("(dd)", (double) x, (double) y);
+}
+%%
+override gtk_plot_canvas_put_text kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_put_text(PyGtk_Object *self, PyObject *args,
+			       PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", "fontname", "height", "angle",
+			      "foreground", "background", "transparent",
+			      "justification", "string", NULL };
+    char *fontname, *string;
+    PyObject *py_foreground, *py_background;
+    GdkColor *foreground = NULL, *background = NULL;
+    double x, y;
+    int angle, height, transparent, justification;
+    GtkPlotCanvasChild *child;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "ddziiOOiiz:GtkPlotCanvas.put_text",
+				     kwlist, &x, &y, &fontname, &height,
+				     &angle, &py_foreground, &py_background,
+				     &transparent, &justification, &string))
+        return NULL;
+    if (PyGdkColor_Check(py_foreground))
+        foreground = PyGdkColor_Get(py_foreground);
+    else if (py_foreground != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"foreground argument must be a GdkColor or None");
+	return NULL;
+    }
+    if (PyGdkColor_Check(py_background))
+        background = PyGdkColor_Get(py_background);
+    else if (py_background != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"background argument must be a GdkColor or None");
+	return NULL;
+    }
+    child = gtk_plot_canvas_put_text(GTK_PLOT_CANVAS(self->obj), x, y,
+				     fontname, height, angle, foreground,
+				     background, transparent, justification,
+				     string);
+    return pygtkextra_plot_canvas_child_new(child);
+}
+%%
+override gtk_plot_canvas_put_line kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_put_line(PyObject *self, PyObject *args,
+			       PyObject *kwargs)
+{
+    static char *kwlist[] = { "x1", "y1", "x2", "y2", "line_style", "width",
+			      "color", "arrow_mask", NULL };
+    double x1, y1, x2, y2;
+    int line_style, arrow_mask;
+    float width;
+    PyObject *py_color;
+    GdkColor *color;
+    GtkPlotCanvasChild *child;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "ddddifOi:GtkPlotCanvas.put_line",
+				     kwlist, &x1, &y1, &x2, &y2, &line_style,
+				     &width, &py_color, &arrow_mask))
+        return NULL;
+    if (PyGdkColor_Check(py_color))
+        color = PyGdkColor_Get(py_color);
+    else if (py_color == Py_None)
+	color = NULL;
+    else {
+        PyErr_SetString(PyExc_TypeError,
+			"color argument must be a GdkColor or None");
+	return NULL;
+    }
+    child = gtk_plot_canvas_put_line(GTK_PLOT_CANVAS(self->obj),
+				     x1, y1, x2, y2, line_style, width,
+				     color, arrow_mask);
+    return pygtkextra_plot_canvas_child_new(child);
+}
+%%
+override gtk_plot_canvas_put_rectangle kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_put_rectangle(PyObject *self, PyObject *args,
+				    PyObject *kwargs)
+{
+    static char *kwlist[] = { "x1", "y1", "x2", "y2", "line_style", "width",
+			      "foreground", "background", "border_style",
+			      "fill", NULL };
+    double x1, y1, x2, y2;
+    int line_style, border_style, fill;
+    float width;
+    PyObject *py_foreground, *py_background;
+    GdkColor *foreground = NULL, *background = NULL,
+    GtkPlotCanvasChild *child;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "ddddifOOii:"\
+				     "GtkPlotCanvas.put_rectangle",
+				     kwlist, &x1, &y1, &x2, &y2, &line_style,
+				     &width, &py_foreground, &py_background,
+				     &border_style, &fill))
+        return NULL;
+    if (PyGdkColor_Check(py_foreground))
+        foreground = PyGdkColor_Get(py_foreground);
+    else if (py_foreground != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"foreground argument must be a GdkColor or None");
+	return NULL;
+    }
+    if (PyGdkColor_Check(py_background))
+        background = PyGdkColor_Get(py_background);
+    else if (py_background != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"background argument must be a GdkColor or None");
+	return NULL;
+    }
+    child = gtk_plot_canvas_put_rectangle(GTK_PLOT_CANVAS(self->obj),
+					  x1, y1, x2, y2, line_style, width,
+					  foreground, background, border_style,
+					  fill);
+    return pygtkextra_plot_canvas_child_new(child);
+}
+%%
+override gtk_plot_canvas_put_ellipse kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_put_ellipse(PyObject *self, PyObject *args,
+				    PyObject *kwargs)
+{
+    static char *kwlist[] = { "x1", "y1", "x2", "y2", "line_style", "width",
+			      "foreground", "background", "fill", NULL };
+    double x1, y1, x2, y2;
+    int line_style, fill;
+    float width;
+    PyObject *py_foreground, *py_background;
+    GdkColor *foreground = NULL, *background = NULL,
+    GtkPlotCanvasChild *child;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "ddddifOOi:GtkPlotCanvas.put_ellipse",
+				     kwlist, &x1, &y1, &x2, &y2, &line_style,
+				     &width, &py_foreground, &py_background,
+				     &fill))
+        return NULL;
+    if (PyGdkColor_Check(py_foreground))
+        foreground = PyGdkColor_Get(py_foreground);
+    else if (py_foreground != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"foreground argument must be a GdkColor or None");
+	return NULL;
+    }
+    if (PyGdkColor_Check(py_background))
+        background = PyGdkColor_Get(py_background);
+    else if (py_background != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"background argument must be a GdkColor or None");
+	return NULL;
+    }
+    child = gtk_plot_canvas_put_ellipse(GTK_PLOT_CANVAS(self->obj),
+					x1, y1, x2, y2, line_style, width,
+					foreground, background, fill);
+    return pygtkextra_plot_canvas_child_new(child);
+}
+%%
+override gtk_plot_canvas_put_pixmap kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_put_pixmap(PyGtk_Object *self, PyObject *args,
+				 PyObject *kwargs)
+{
+    static char *kwlist[] = { "pixmap", "x1", "y1", NULL };
+    double x1, y1;
+    PyObject *py_pixmap;
+    GdkPixmap *pixmap = NULL;
+    GtkPlotCanvasChild *child;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "Odd:GtkPlotCanvas.put_pixmap", kwlist,
+				     py_pixmap, &x1, &y1))
+        return NULL;
+    if (PyGdkWindow_Check(py_pixmap))
+	pixmap = PyGdkWindow_Get(py_pixmap);
+    else if (py_pixmap != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"pixmap argument must be a GdkPixmap or None");
+	return NULL;
+    }
+    child = gtk_plot_canvas_put_pixmap(GTK_PLOT_CANVAS(self->obj),
+				       pixmap, x1, y1);
+    return pygtkextra_plot_canvas_child_new(child);
+}
+%%
+override gtk_plot_canvas_put_child kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_put_child(PyGtk_Object *self, PyObject *args,
+				PyObject *kwargs)
+{
+    static char *kwlist[] = { "child", "x1", "y1", "x2", "y2", NULL };
+    PyObject *child;
+    double x1, y1, x2, y2;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "Odddd:GtkPlotCanvas.put_child", kwlist,
+				     &child, &x1, &y1, &x2, &y2))
+        return NULL;
+    if (!PyGtkPlotCanvasChild_Check(child)) {
+        PyErr_SetString(PyExc_TypeError,
+			"child argument must be a GtkPlotCanvasChild");
+	return NULL;
+    }
+    gtk_plot_canvas_put_child(GTK_PLOT_CANVAS(self->obj),
+			      PyGtkPlotCanvasChild_Get(child),
+			      x1, y1, x2, y2);
+    pygtkextra_plot_canvas_register_child(GTK_PLOT_CANVAS(self->obj), child);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_canvas_child_move kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_child_move(PyObject *self, PyObject *args,
+				 PyObject *kwargs)
+{
+    static char *kwlist[] = { "child", "x1", "y1", NULL };
+    PyObject *child;
+    double x1, y1;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "Odd:GtkPlotCanvas.child_move", kwlist,
+				     &child, &x1, &y1))
+        return NULL;
+    if (!PyGtkPlotCanvasChild_Check(child)) {
+        PyErr_SetString(PyExc_TypeError,
+			"child argument must be a GtkPlotCanvasChild");
+	return NULL;
+    }
+    gtk_plot_canvas_child_move(GTK_PLOT_CANVAS(self->obj),
+			       PyGtkPlotCanvasChild_Get(child),
+			       x1, y1);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_canvas_child_move_resize kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_child_move_resize(PyObject *self, PyObject *args,
+					PyObject *kwargs)
+{
+    static char *kwlist[] = { "child", "x1", "y1", "x2", "y2", NULL };
+    PyObject *child;
+    double x1, y1, x2, y2;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "Odddd:GtkPlotCanvas.move_resize",
+				     kwlist, &child, &x1, &y1, &x2, &y2))
+        return NULL;
+    if (!PyGtkPlotCanvasChild_Check(child)) {
+        PyErr_SetString(PyExc_TypeError,
+			"child argument must be a GtkPlotCanvasChild");
+	return NULL;
+    }
+    gtk_plot_canvas_put_child(GTK_PLOT_CANVAS(self->obj),
+			      PyGtkPlotCanvasChild_Get(child),
+			      x1, y1, x2, y2);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_canvas_remove_child kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_remove_child(PyGtk_Object *self, PyObject *args,
+				  PyObject *kwargs)
+{
+    static char *kwlist[] = { "child", NULL };
+    PyObject *child;
+    gboolean ok;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "O:GtkPlotCanvas.remove_child", kwlist,
+				     &child))
+        return NULL;
+    if (!PyGtkPlotCanvasChild_Check(child)) {
+        PyErr_SetString(PyExc_TypeError,
+			"child argument must be a GtkPlotCanvasChild");
+	return NULL;
+    }
+    ok = gtk_plot_canvas_remove_child(GTK_PLOT_CANVAS(self->obj),
+				      PyGtkPlotCanvasChild_Get(child));
+    if (ok)
+	pygtkextra_plot_canvas_unregister_child(GTK_PLOT_CANVAS(self->obj),
+						child);
+    return PyInt_FromLong(ok);
+}
+%%
+override gtk_plot_canvas_export_ps kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_export_ps(PyGtk_Object *self, PyObject *args,
+				PyObject *kwargs)
+{
+    static char *kwlist[] = { "filename", "orientation", "eps", "paper_size",
+			      NULL };
+    char *filename, *locale;
+    int orientation = GTK_PLOT_PORTRAIT, eps = FALSE,
+	paper_size = GTK_PLOT_LETTER;
+    gboolean ok;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "s|iii:GtkPlotCanvas.export_ps", kwlist,
+				     &filename, &orientation, &eps,
+				     &paper_size))
+        return NULL;
+    /* Since the export function crashes if the export file cannot be
+       opened for writing, we have to check if it is possible to create
+       the file. */
+    if (pygtkextra_try_fopen(filename, "w") < 0)
+	return NULL;
+    locale = setlocale(LC_NUMERIC, NULL);
+    setlocale(LC_NUMERIC, "C");
+    ok = gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(self->obj), filename,
+				   orientation, eps, paper_size);
+    setlocale(LC_NUMERIC, locale);
+    return PyInt_FromLong(ok);
+}
+%%
+override gtk_plot_canvas_export_ps_with_size kwargs
+static PyObject *
+_wrap_gtk_plot_canvas_export_ps_with_size(PyGtk_Object *self, PyObject *args,
+					  PyObject *kwargs)
+{
+    static char *kwlist[] = { "filename", "orientation", "eps", "units",
+			      "width", "height", NULL };
+    char *filename, *locale;
+    int orientation = GTK_PLOT_PORTRAIT, eps = FALSE,
+	units = GTK_PLOT_PSPOINTS, width = GTK_PLOT_LETTER_W,
+	height = GTK_PLOT_LETTER_H;
+    gboolean ok;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "s|iiiii:"\
+				     "GtkPlotCanvas.export_ps_with_size",
+				     kwlist, &filename, &orientation, &eps,
+				     &units, &width, &height))
+        return NULL;
+    /* Since the export function crashes if the export file cannot be
+       opened for writing, we have to check if it is possible to create
+       the file. */
+    if (pygtkextra_try_fopen(filename, "w") < 0)
+	return NULL;
+    locale = setlocale(LC_NUMERIC, NULL);
+    setlocale(LC_NUMERIC, "C");
+    ok = gtk_plot_canvas_export_ps_with_size(GTK_PLOT_CANVAS(self->obj),
+					     filename, orientation, eps,
+					     units, width, height);
+    setlocale(LC_NUMERIC, locale);
+    return PyInt_FromLong(ok);
+}
+%%
+override gtk_icon_list_new kwargs
+static PyObject *
+_wrap_gtk_icon_list_new(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "icon_width", "mode", NULL };
+    GtkWidget *widget;
+    int icon_width = 48, mode = GTK_ICON_LIST_TEXT_BELOW;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|ii:GtkIconList.__init__",
+				     kwlist, &icon_width, &mode))
+        return NULL;
+    widget = gtk_icon_list_new(icon_width, mode);
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkIconList object");
+	return NULL;
+    }
+    gtk_signal_connect(GTK_OBJECT(widget), "destroy",
+		       GTK_SIGNAL_FUNC(pygtkextra_icon_list_destroy_cb), NULL);
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_icon_list_add_from_pixmap kwargs
+static PyObject *
+_wrap_gtk_icon_list_add_from_pixmap(PyGtk_Object *self, PyObject *args,
+				    PyObject *kwargs)
+{
+    static char *kwlist[] = { "pixmap", "mask", "label", "object", NULL };
+    char *label = NULL;
+    PyObject *py_pixmap, *py_mask = Py_None, *object = Py_None;
+    GdkBitmap *mask = NULL;
+    GtkIconListItem *item;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "O|OzO:GtkIconList.add_from_pixmap", kwlist,
+				     &py_pixmap, &py_mask, &label, &object))
+        return NULL;
+    if (!PyGdkWindow_Check(py_pixmap)) {
+        PyErr_SetString(PyExc_TypeError, "pixmap argument must be a GdkPixmap");
+	return NULL;
+    }
+    if (PyGdkWindow_Check(py_mask))
+        mask = PyGdkWindow_Get(py_mask);
+    else if (py_mask != Py_None) {
+        PyErr_SetString(PyExc_TypeError,
+			"mask argument must be a GdkBitmap or None");
+	return NULL;
+    }
+    item =
+	gtk_icon_list_add_from_pixmap(GTK_ICON_LIST(self->obj),
+				      PyGdkWindow_Get(py_pixmap), mask, label,
+				      pygtkextra_icon_list_register_link(object));
+    return pygtkextra_icon_list_item_new(item);
+}
+%%
+override gtk_icon_list_add_from_data kwargs
+static PyObject *
+_wrap_gtk_icon_list_add_from_data(PyGtk_Object *self, PyObject *args,
+				  PyObject *kwargs)
+{
+    static char *kwlist[] = { "data", "label", "object", NULL };
+    char *label = NULL, **vector;
+    PyObject *data, *object = Py_None;
+    GtkIconListItem *item;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "O|zO:GtkIconList.add_from_data", kwlist,
+				     &data, &label, &object))
+        return NULL;
+    /* Convert the string list to a character array. */
+    if (!(vector = pygtkextra_convert_pixmap_data_to_vector(data)))
+	return NULL;
+    item =
+	gtk_icon_list_add_from_data(GTK_ICON_LIST(self->obj), vector, label,
+				    pygtkextra_icon_list_register_link(object));
+    g_free(vector);
+    return pygtkextra_icon_list_item_new(item);
+}
+%%
+override gtk_icon_list_add kwargs
+static PyObject *
+_wrap_gtk_icon_list_add(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "filename", "label", "object", NULL };
+    char *filename, *label = NULL;
+    PyObject *object = Py_None;
+    GtkIconListItem *item;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|zO:GtkIconList.add",
+				     kwlist, &filename, &label, &object))
+        return NULL;
+    /* The pixmap file must exist and be readable. */
+    if (pygtkextra_try_fopen(filename, "r") < 0)
+	return NULL;
+    item = gtk_icon_list_add(GTK_ICON_LIST(self->obj), filename, label,
+			     pygtkextra_icon_list_register_link(object));
+    return pygtkextra_icon_list_item_new(item);
+}
+%%
+override gtk_icon_list_get_nth kwargs
+static PyObject *
+_wrap_gtk_icon_list_get_nth(PyGtk_Object *self, PyObject *args,
+			    PyObject *kwargs)
+{
+    static char *kwlist[] = { "n", NULL };
+    int n;
+    GtkIconListItem *item;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:GtkIconList.get_nth",
+				     kwlist, &n))
+        return NULL;
+    item = gtk_icon_list_get_nth(GTK_ICON_LIST(self->obj), n);
+    return pygtkextra_icon_list_item_new(item);
+}
+%%
+override gtk_icon_list_get_index kwargs
+static PyObject *
+_wrap_gtk_icon_list_get_index(PyGtk_Object *self, PyObject *args,
+			      PyObject *kwargs)
+{
+    static char *kwlist[] = { "item", NULL };
+    PyObject *py_item;
+    int i;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkIconList.get_index",
+				     kwlist, &py_item))
+        return NULL;
+    if (!PyGtkIconListItem_Check(py_item)) {
+	PyErr_SetString(PyExc_TypeError,
+			"item argument must be a GtkIconListItem");
+	return NULL;
+    }
+    i = gtk_icon_list_get_index(GTK_ICON_LIST(self->obj),
+				PyGtkIconListItem_Get(item));
+    return PyInt_FromLong(i);
+}
+%%
+override gtk_icon_list_remove kwargs
+static PyObject *
+_wrap_gtk_icon_list_remove(PyGtk_Object *self, PyObject *args,
+			   PyObject *kwargs)
+{
+    static char *kwlist[] = { "item", NULL };
+    PyObject *py_item;
+    GtkIconListItem *item;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkIconList.remove",
+				     kwlist, &py_item))
+        return NULL;
+    if (!PyGtkIconListItem_Check(py_item)) {
+	PyErr_SetString(PyExc_TypeError,
+			"item argument must be a GtkIconListItem");
+	return NULL;
+    }
+    item = PyGtkIconListItem_Get(py_item);
+    if (item->link)
+	pygtkextra_icon_list_unregister_link(item->link);
+    gtk_icon_list_remove(GTK_ICON_LIST(self->obj), item);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_icon_list_set_active_icon kwargs
+static PyObject *
+_wrap_gtk_icon_list_set_active_icon(PyGtk_Object *self, PyObject *args,
+				    PyObject *kwargs)
+{
+    static char *kwlist[] = { "item", NULL };
+    PyObject *py_item;
+    GtkIconListItem *item;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "O:GtkIconList.set_active_icon", kwlist,
+				     &py_item))
+        return NULL;
+    if (!PyGtkIconListItem_Check(py_item)) {
+	PyErr_SetString(PyExc_TypeError,
+			"item argument must be a GtkIconListItem");
+	return NULL;
+    }
+    item = PyGtkIconListItem_Get(py_item);
+    gtk_icon_list_set_active_icon(GTK_ICON_LIST(self->obj), item);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_icon_list_remove_nth kwargs
+static PyObject *
+_wrap_gtk_icon_list_remove_nth(PyGtk_Object *self, PyObject *args,
+			       PyObject *kwargs)
+{
+    static char *kwlist[] = { "n", NULL };
+    int n;
+    GtkIconListItem *item;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "i:GtkIconList.remove_nth",
+				     kwlist, &n))
+        return NULL;
+    item = gtk_icon_list_get_nth(GTK_ICON_LIST(self->obj), n);
+    if (item) {
+	if (item->link)
+	    pygtkextra_icon_list_unregister_link(item->link);
+	gtk_icon_list_remove(GTK_ICON_LIST(self->obj), item);
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_icon_list_clear
+static PyObject *
+_wrap_gtk_icon_list_clear(PyGtk_Object *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkIconList.clear"))
+        return NULL;
+    pygtkextra_icon_list_unref_links(GTK_ICON_LIST(self->obj));
+    gtk_icon_list_clear(GTK_ICON_LIST(self->obj));
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_icon_list_get_icon_from_link kwargs
+static PyObject *
+_wrap_gtk_icon_list_get_icon_from_link(PyGtk_Object *self, PyObject *args,
+				       PyObject *kwargs)
+{
+    static char *kwlist[] = { "object", NULL };
+    PyObject *object;
+    GtkIconListItem *item;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "O:GtkIconList.get_icon_from_link",
+				     kwlist, &object))
+        return NULL;
+    item =
+	gtk_icon_list_get_icon_from_link(GTK_ICON_LIST(self->obj),
+					 pygtkextra_icon_list_get_link(object));
+    return pygtkextra_icon_list_item_new(item);
+}
+%%
+override gtk_icon_list_get_icon_at kwargs
+static PyObject *
+_wrap_gtk_icon_list_get_icon_at(PyGtk_Object *self, PyObject *args,
+				PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", NULL };
+    int x, y;
+    GtkIconListItem *item;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "ii:GtkIconList.get_icon_at", kwlist,
+				     &x, &y))
+        return NULL;
+    item = gtk_icon_list_get_icon_at(GTK_ICON_LIST(self->obj), x, y);
+    return pygtkextra_icon_list_item_new(item);
+}
+%%
+override gtk_icon_list_get_active_icon
+static PyObject *
+_wrap_gtk_icon_list_get_active_icon(PyGtk_Object *self, PyObject *args)
+{
+    GtkIconListItem *item;
+
+    if (!PyArg_ParseTuple(args, ":GtkIconList.get_active_icon"))
+        return NULL;
+    item = gtk_icon_list_get_active_icon(GTK_ICON_LIST(self->obj));
+    return pygtkextra_icon_list_item_new(item);
+}
+%%
+override gtk_icon_list_set_label kwargs
+static PyObject *
+_wrap_gtk_icon_list_set_label(PyGtk_Object *self, PyObject *args,
+			      PyObject *kwargs)
+{
+    static char *kwlist[] = { "item", "label", NULL };
+    PyObject *py_item;
+    char *label;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oz:GtkIconList.set_label",
+				     kwlist, &py_item, &label))
+        return NULL;
+    if (!PyGtkIconListItem_Check(py_item)) {
+	PyErr_SetString(PyExc_TypeError,
+			"item argument must be a GtkIconListItem");
+	return NULL;
+    }
+    if (!label)
+	label = "";
+    gtk_icon_list_set_label(GTK_ICON_LIST(PyGtk_Get(icon_list)),
+			    PyGtkIconListItem_Get(py_item), label);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_icon_list_select_icon kwargs
+static PyObject *
+_wrap_gtk_icon_list_select_icon(PyGtk_Object *self, PyObject *args,
+				PyObject *kwargs)
+{
+    static char *kwlist[] = { "item", NULL };
+    PyObject *py_item;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:GtkIconList.select_icon",
+				     kwlist, &py_item))
+        return NULL;
+    if (!PyGtkIconListItem_Check(py_item)) {
+	PyErr_SetString(PyExc_TypeError,
+			"item argument must be a GtkIconListItem");
+	return NULL;
+    }
+    gtk_icon_list_select_icon(GTK_ICON_LIST(self->obj),
+			      PyGtkIconListItem_Get(py_item));
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_icon_list_unselect_icon kwargs
+static PyObject *
+_wrap_gtk_icon_list_unselect_icon(PyGtk_Object *self, PyObject *args,
+				  PyObject *kwargs)
+{
+    static char *kwlist[] = { "item", NULL };
+    PyObject *py_item;
+    GtkIconListItem *item;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "O:GtkIconList.unselect_icon", kwlist,
+				     &py_item))
+        return NULL;
+    if (!PyGtkIconListItem_Check(py_item)) {
+	PyErr_SetString(PyExc_TypeError,
+			"item argument must be a GtkIconListItem");
+	return NULL;
+    }
+    item = PyGtkIconListItem_Get(py_item);
+    gtk_icon_list_unselect_icon(GTK_ICON_LIST(self->obj), item);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_file_list_new kwargs
+static PyObject *
+_wrap_gtk_file_list_new(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "icon_width", "mode", "path", NULL };
+    GtkWidget *widget;
+    int icon_width = 20, mode = GTK_ICON_LIST_TEXT_RIGHT;
+    char *path = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "|iiz:GtkFileList.__init__", kwlist,
+				     &icon_width, &mode, &path))
+        return NULL;
+    widget = gtk_file_list_new(icon_width, mode, path);
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkFileList object");
+	return NULL;
+    }
+    gtk_signal_connect(GTK_OBJECT(widget), "destroy",
+		       GTK_SIGNAL_FUNC(pygtkextra_icon_list_destroy_cb), NULL);
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_file_list_get_filename
+static PyObject *
+_wrap_gtk_file_list_get_filename(PyGtk_Object *self, PyObject *args)
+{
+    char *filename;
+
+    if (!PyArg_ParseTuple(args, ":GtkFileList.get_filename"))
+        return NULL;
+    filename = gtk_file_list_get_filename(GTK_FILE_LIST(self->obj));
+    return PyString_FromString((filename) ? filename : "");
+}
+%%
+override gtk_file_list_add_type kwargs
+static PyObject *
+_wrap_gtk_file_list_add_type(PyGtk_Object *self, PyObject *args,
+			     PyObject *kwargs)
+{
+    static char *kwlist[] = { "data", NULL };
+    PyObject *data;
+    char **vector;
+    gint type;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "O:GtkFileList.add_type", kwlist,
+				     &data))
+        return NULL;
+    /* Convert the string list to a character array. */
+    if (!(vector = pygtkextra_convert_pixmap_data_to_vector(data)))
+	return NULL;
+    type = gtk_file_list_add_type(GTK_FILE_LIST(self->obj),
+				  (const gchar **) vector);
+    g_free(vector);
+    return PyInt_FromLong(type);
+}
+%%
+override gtk_icon_file_selection_new kwargs
+static PyObject *
+_wrap_gtk_icon_file_selection_new(PyGtk_Object *self, PyObject *args,
+				  PyObject *kwargs)
+{
+    static char *kwlist[] = { "title", NULL };
+    GtkWidget *widget;
+    char *title = NULL;
+    GtkWidget *file_list;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "|z:GtkIconFileSelection.__init__",
+				     kwlist, &title))
+        return NULL;
+    if (!title)
+	title = "";
+    widget = gtk_icon_file_selection_new(title);
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkIconFileSelection object");
+	return NULL;
+    }
+    file_list = GTK_ICON_FILESEL(widget)->file_list;
+    if (file_list) {
+	gtk_signal_connect(GTK_OBJECT(file_list), "destroy",
+			   GTK_SIGNAL_FUNC(pygtkextra_icon_list_destroy_cb),
+			   NULL);
+    }
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_item_entry_get_justification
+static PyObject *
+_wrap_gtk_item_entry_get_justification(PyGtk_Object *self, PyObject *args)
+{
+    if (!PyArg_ParseTuple(args, ":GtkItemEntry.get_justification"))
+        return NULL;
+    return PyInt_FromLong(GTK_ITEM_ENTRY(self->obj)->justification);
+}
+%%
+override gtk_color_combo_new kwargs
+static PyObject *
+_wrap_gtk_color_combo_new(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "rows", "columns", "colors", NULL };
+    GtkWidget *widget;
+    int rows = 0, columns = 0;
+    PyObject *colors = Py_None;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "|iiO:GtkColorCombo.__init__", kwlist,
+				     &rows, &columns, &colors))
+        return NULL;
+    if (colors == Py_None) {
+	widget = gtk_color_combo_new();
+    } else {
+	int i, len, size;
+	char **vector;
+	
+	widget = NULL;
+	if (!PySequence_Check(colors)) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "colors argument must be a sequence");
+	    return NULL;
+	}
+	len = PySequence_Length(colors);
+	size = pygtkextra_color_combo_get_len(len, &rows, &columns);
+	vector = g_new(char *, size);
+	for (i = 0; i < size; ++i) {
+	    if (i < len) {
+		PyObject *color;
+	    
+		color = PySequence_GetItem(colors, i);
+		vector[i] = pygtkextra_get_colorname(color);
+		Py_DECREF(color);
+		if (!vector[i]) {
+		    PyErr_SetString(PyExc_TypeError,
+				    "sequence items must be color "\
+				    "specifications");
+		    size = i + 1;
+		    goto cleanup;
+		}
+	    } else
+		vector[i] = g_strdup("#000000000000");
+	}
+    
+	widget = gtk_color_combo_new_with_values(rows, columns, vector);
+	
+    cleanup:
+
+	for (i = 0; i < size; ++i)
+	    g_free(vector[i]);
+	g_free(vector);
+    }
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkColorCombo object");
+	return NULL;
+    }
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+ignore gtk_color_combo_new_with_values
+%%
+override gtk_color_combo_find_color kwargs
+static PyObject *
+_wrap_gtk_color_combo_find_color(PyGtk_Object *self, PyObject *args,
+				 PyObject *kwargs)
+{
+    static char *kwlist[] = { "color", NULL };
+    PyObject *color;
+    gint row, column;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "O!:GtkColorCombo.find_color", kwlist,
+				     &PyGdkColor_Type, &color))
+        return NULL;
+    gtk_color_combo_find_color(GTK_COLOR_COMBO(self->obj),
+			       PyGdkColor_Get(color), &row, &column);
+    if (row < 0 || column < 0) {
+	/* In Python None is returned if the color was not found. */
+	Py_INCREF(Py_None);
+	return Py_None;
+    }
+    return Py_BuildValue("(ii)", (int) row, (int) column);
+}
+%%
+override gtk_toggle_combo_new kwargs
+static PyObject *
+_wrap_gtk_toggle_combo_new(PyGtk_Object *self, PyObject *args,
+			   PyObject *kwargs)
+{
+    static char *kwlist[] = { "rows", "columns", NULL };
+    GtkWidget *widget;
+    int rows = 0, columns = 0;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+				     "|ii:GtkToggleCombo.__init__", kwlist,
+				     &rows, &columns))
+        return NULL;
+    widget = gtk_toggle_combo_new();
+    if (!widget) {
+	PyErr_SetString(PyExc_RuntimeError,
+			"cannot create GtkToggleCombo object");
+	return NULL;
+    }
+    self->obj = GTK_OBJECT(widget);
+    pygtk_register_wrapper((PyObject *) self);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_toggle_combo_get_selection kwargs
+static PyObject *
+_wrap_gtk_toggle_combo_get_selection(PyObject *self, PyObject *args)
+{
+    gint row, column;
+
+    if (!PyArg_ParseTuple(args, ":GtkToggleCombo.get_selection"))
+        return NULL;
+    gtk_toggle_combo_get_selection(GTK_TOGGLE_COMBO(self->obj), &row, &column);
+    if (row < 0 || column < 0) {
+	Py_INCREF(Py_None);
+	return Py_None;
+    }
+    return Py_BuildValue("(ii)", (int) row, (int) column);
+}
+override gtk_font_combo_get_psfont
+static PyObject *
+_wrap_gtk_font_combo_get_psfont(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, ":gtk_font_combo_get_psfont"))
+        return NULL;
+    return pygtkextra_psfont_new(GTK_FONT_COMBO(self->obj)->psfont);
+}
+%%
+override gtk_psfont_get_font
+static PyObject *
+_wrap_gtk_psfont_get_font(PyObject *self, PyObject *args)
+{
+    char *fontname;
+
+    if (!PyArg_ParseTuple(args, "s:gtk_psfont_get_font", &fontname))
+        return NULL;
+    return pygtkextra_psfont_new(gtk_psfont_get_font(fontname));
+}
+%%
+override gtk_psfont_get_gdkfont
+static PyObject *
+_wrap_gtk_psfont_get_gdkfont(PyObject *self, PyObject *args)
+{
+    int height;
+    char *fontname;
+    GdkFont *font;
+
+    if (!PyArg_ParseTuple(args, "si:gtk_psfont_get_gdkfont", &fontname,
+			  &height))
+        return NULL;
+    font = gtk_psfont_get_gdkfont(fontname, height);
+    if (font) {
+	PyObject *obj = PyGdkFont_New(font);
+	gdk_font_unref(font);
+	return obj;
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_psfont_add_font
+static PyObject *
+_wrap_gtk_psfont_add_font(PyObject *self, PyObject *args)
+{
+    int italic, bold;
+    char *fontname, *psfont, *family, *xfont[2];
+    PyObject *py_xfont;
+
+    xfont[0] = NULL;
+    xfont[1] = NULL;
+    if (!PyArg_ParseTuple(args, "sssOii:gtk_psfont_add_font", &fontname,
+			  &psfont, &family, &py_xfont, &italic, &bold))
+        return NULL;
+    if (PyString_Check(py_xfont))
+	xfont[0] = PyString_AS_STRING(py_xfont);
+    else if (PySequence_Check(py_xfont)) {
+	int i, len;
+	
+	len = PySequence_Length(py_xfont);
+	if (len > 2) {
+	    PyErr_SetString(PyExc_ValueError,
+			    "sequence must have at most 2 items");
+	    return NULL;
+	}
+	for (i = 0; i < len; ++i) {
+	    PyObject *item = PySequence_GetItem(py_xfont, i);
+	    if (PyString_Check(item))
+		xfont[i] = PyString_AS_STRING(item);
+	    else if (item != Py_None) {
+		PyErr_SetString(PyExc_TypeError,
+				"sequence items must be strings or None");
+		Py_DECREF(item);
+		return NULL;
+	    }
+	    Py_DECREF(item);
+	}
+    } else {
+	PyErr_SetString(PyExc_TypeError,
+			"4th argument must be sequence or string");
+	return NULL;
+    }
+    gtk_psfont_add_font(fontname, psfont, family, xfont, italic, bold);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_psfont_add_i18n_font
+static PyObject *
+_wrap_gtk_psfont_add_i18n_font(PyObject *self, PyObject *args)
+{
+    int italic, bold, vertical;
+    char *fontname, *psfont, *family, *i18n_latinfamily, *xfont[2];
+    PyObject *py_xfont;
+
+    xfont[0] = NULL;
+    xfont[1] = NULL;
+    if (!PyArg_ParseTuple(args, "ssssOiii:gtk_psfont_add_font", &fontname,
+			  &psfont, &family, &i18n_latinfamily, &py_xfont,
+			  &italic, &bold, &vertical))
+        return NULL;
+    if (PyString_Check(py_xfont))
+	xfont[0] = PyString_AS_STRING(py_xfont);
+    else if (PySequence_Check(py_xfont)) {
+	int i, len;
+	
+	len = PySequence_Length(py_xfont);
+	if (len > 2) {
+	    PyErr_SetString(PyExc_ValueError,
+			    "sequence must have at most 2 items");
+	    return NULL;
+	}
+	for (i = 0; i < len; ++i) {
+	    PyObject *item = PySequence_GetItem(py_xfont, i);
+	    if (PyString_Check(item))
+		xfont[i] = PyString_AS_STRING(item);
+	    else if (item != Py_None) {
+		PyErr_SetString(PyExc_TypeError,
+				"sequence items must be strings or None");
+		Py_DECREF(item);
+		return NULL;
+	    }
+	    Py_DECREF(item);
+	}
+    } else {
+	PyErr_SetString(PyExc_TypeError,
+			"5th argument must be sequence or string");
+	return NULL;
+    }
+    gtk_psfont_add_i18n_font(fontname, psfont, family, i18n_latinfamily,
+			     xfont, italic, bold, vertical);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_psfont_find_by_family
+static PyObject *
+_wrap_gtk_psfont_find_by_family(PyObject *self, PyObject *args)
+{
+    char *family;
+    int italic, bold;
+
+    if (!PyArg_ParseTuple(args, "sii:gtk_psfont_find_by_family", &family,
+			  &italic, &bold))
+        return NULL;
+    return pygtkextra_psfont_new(gtk_psfont_find_by_family(family, italic,
+							   bold));
+}
+%%
+override gtk_psfont_get_families
+static PyObject *
+_wrap_gtk_psfont_get_families(PyObject *self, PyObject *args)
+{
+    int i;
+    gint len;
+    GList *families;
+    PyObject *list;
+    
+    if (!PyArg_ParseTuple(args, ":gtk_psfont_get_families"))
+        return NULL;
+    gtk_psfont_get_families(&families, &len);
+    list = PyList_New(len);
+    if (!list) {
+	g_list_free(families);
+	return NULL;
+    }
+    for (i = 0; i < len; ++i) {
+	PyObject *family;
+
+	family = PyString_FromString((char *) g_list_nth_data(families, i));
+	if (!family) {
+	    Py_DECREF(list);
+	    g_list_free(families);
+	    return NULL;
+	}
+	PyList_SET_ITEM(list, i, family);
+    }
+    g_list_free(families);
+    return list;
+}

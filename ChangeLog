@@ -1,0 +1,41 @@
+2001-09-15  Andreas Voegele  <voegelas@users.sourceforge.net>
+
+	* MANIFEST.in: Moved the source files into a sub directory.
+
+	* setup.py: The bindings are now a package.
+	Updated the version number.
+
+	* setup.cfg: Removed the build_requires option.
+
+	* gtkextra/__init__.py: Renamed gtkextra.py to __init__.py.
+	There's currently a lot of code in __init__.py that will be moved
+	to other modules and the shared library when we switch to PyGTK 2.
+
+	* gtkextra/gtkextra.defs: Use the new definition file format.
+
+	* gtkextra/mkgtkextra.py: Build a temporary file with the old
+	definition format.
+
+	* gtkextra/gtkplotdata-support.c: If WITHOUT_NUMPY is defined the
+	bindings are built without Numerical Python support.
+	
+2001-08-15  Andreas Voegele  <voegelas@users.sourceforge.net>
+
+	* setup.py, setup.cfg: The bindings are now built and installed
+	with the Python Distribution Utilities.
+
+	* gtkplotdata-support.c (pygtkextra_plot_data_import_numpy):
+	Import Numerical Python.
+
+	* gtkextra-support.c (_pygtkextra_register_boxed_types): Call
+	pygtkextra_plot_data_import_numpy().
+
+	* pygtkextra-private.h: Include pygtk/pygtk.h, structmember.h,
+	math.h, stdio.h and locale.h.  Most source files now include
+	pygtkextra-private.h only.
+
+	* gtkextra.py (GtkCheckItem): GtkCheckItem is now an alias for the
+	standard GtkCheckButton.
+
+	* examples/testrealtime.py (Application.__init__): Added
+	plot.clip_data(TRUE).

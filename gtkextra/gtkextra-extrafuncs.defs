@@ -1,0 +1,444 @@
+; -*- scheme -*-
+
+(define-method sheet_set_flags
+  (of-object "GtkSheet")
+  (c-name "GTK_SHEET_SET_FLAGS")
+  (return-type "none")
+  (parameters
+    '("guint16" "flags")
+  )
+)
+
+(define-method sheet_unset_flags
+  (of-object "GtkSheet")
+  (c-name "GTK_SHEET_UNSET_FLAGS")
+  (return-type "none")
+  (parameters
+    '("guint16" "flags")
+  )
+)
+
+(define-method plot_canvas_set_flags
+  (of-object "GtkPlotCanvas")
+  (c-name "GTK_PLOT_CANVAS_SET_FLAGS")
+  (return-type "none")
+  (parameters
+    '("guint16" "flags")
+  )
+)
+
+(define-method plot_canvas_unset_flags
+  (of-object "GtkPlotCanvas")
+  (c-name "GTK_PLOT_CANVAS_UNSET_FLAGS")
+  (return-type "none")
+  (parameters
+    '("guint16" "flags")
+  )
+)
+
+(define-method get_column_title
+  (of-object "GtkSheet")
+  (c-name "gtk_sheet_get_column_title")
+  (return-type "const-gchar*")
+  (can-return-null #t)
+  (parameters
+    '("gint" "column")
+  )
+)
+
+(define-method get_row_title
+  (of-object "GtkSheet")
+  (c-name "gtk_sheet_get_row_title")
+  (return-type "const-gchar*")
+  (can-return-null #t)
+  (parameters
+    '("gint" "row")
+  )
+)
+
+(define-method get_column_width
+  (of-object "GtkSheet")
+  (c-name "gtk_sheet_get_column_width")
+  (return-type "gint")
+  (parameters
+    '("gint" "column")
+  )
+)
+
+(define-method get_row_height
+  (of-object "GtkSheet")
+  (c-name "gtk_sheet_get_row_height")
+  (return-type "gint")
+  (parameters
+    '("gint" "row")
+  )
+)
+
+(define-method get_range
+  (of-object "GtkSheet")
+  (c-name "gtk_sheet_get_range")
+  (return-type "none")
+  (parameters
+    '("GtkSheetRange*" "out_range")
+  )
+)
+
+(define-method get_justification
+  (of-object "GtkItemEntry")
+  (c-name "gtk_item_entry_get_justification")
+  (return-type "int")
+)
+
+(define-enum "TODO"
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("normal" "GTK_SHEET_NORMAL")
+    '("row-selected" "GTK_SHEET_ROW_SELECTED")
+    '("column-selected" "GTK_SHEET_COLUMN_SELECTED")
+    '("range-selected" "GTK_SHEET_RANGE_SELECTED")
+  )
+)
+
+(define-flags "TODO"
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("left-border" "GTK_SHEET_LEFT_BORDER")
+    '("right-border" "GTK_SHEET_RIGHT_BORDER")
+    '("top-border" "GTK_SHEET_TOP_BORDER")
+    '("bottom-border" "GTK_SHEET_BOTTOM_BORDER")
+  )
+)
+
+(define-flags "TODO"
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("is-locked" "GTK_SHEET_IS_LOCKED")
+    '("is-frozen" "GTK_SHEET_IS_FROZEN")
+    '("in-xdrag" "GTK_SHEET_IN_XDRAG")
+    '("in-ydrag" "GTK_SHEET_IN_YDRAG")
+    '("in-selection" "GTK_SHEET_IN_SELECTION")
+    '("in-resize" "GTK_SHEET_IN_RESIZE")
+    '("in-clip" "GTK_SHEET_IN_CLIP")
+    '("row-frozen" "GTK_SHEET_ROW_FROZEN")
+    '("column-frozen" "GTK_SHEET_COLUMN_FROZEN")
+    '("auto-resize" "GTK_SHEET_AUTORESIZE")
+    '("clip-text" "GTK_SHEET_CLIP_TEXT")
+    '("row-titles-visible" "GTK_SHEET_ROW_TITLES_VISIBLE")
+    '("column-titles-visible" "GTK_SHEET_COL_TITLES_VISIBLE")
+    '("auto-scroll" "GTK_SHEET_AUTO_SCROLL")
+    '("justify-entry" "GTK_SHEET_JUSTIFY_ENTRY")
+  )
+)
+
+(define-enum PlotScale
+  (in-module "GtkExtra")
+  (c-name "GtkPlotScale")
+  (gtype-id "TODO")
+  (values
+    '("linear" "GTK_PLOT_SCALE_LINEAR")
+    '("log10" "GTK_PLOT_SCALE_LOG10")
+  )
+)
+
+(define-enum PlotSymbolType
+  (in-module "GtkExtra")
+  (c-name "GtkPlotSymbolType")
+  (gtype-id "TODO")
+  (values
+    '("none" "GTK_PLOT_SYMBOL_NONE")
+    '("square" "GTK_PLOT_SYMBOL_SQUARE")
+    '("circle" "GTK_PLOT_SYMBOL_CIRCLE")
+    '("up-triangle" "GTK_PLOT_SYMBOL_UP_TRIANGLE")
+    '("down-triangle" "GTK_PLOT_SYMBOL_DOWN_TRIANGLE")
+    '("right-triangle" "GTK_PLOT_SYMBOL_RIGHT_TRIANGLE")
+    '("left-triangle" "GTK_PLOT_SYMBOL_LEFT_TRIANGLE")
+    '("diamond" "GTK_PLOT_SYMBOL_DIAMOND")
+    '("plus" "GTK_PLOT_SYMBOL_PLUS")
+    '("cross" "GTK_PLOT_SYMBOL_CROSS")
+    '("star" "GTK_PLOT_SYMBOL_STAR")
+    '("dot" "GTK_PLOT_SYMBOL_DOT")
+    '("impulse" "GTK_PLOT_SYMBOL_IMPULSE")
+  )
+)
+
+(define-enum PlotSymbolStyle
+  (in-module "GtkExtra")
+  (c-name "GtkPlotSymbolStyle")
+  (gtype-id "TODO")
+  (values
+    '("empty" "GTK_PLOT_SYMBOL_EMPTY")
+    '("filled" "GTK_PLOT_SYMBOL_FILLED")
+    '("opaque" "GTK_PLOT_SYMBOL_OPAQUE")
+  )
+)
+
+(define-enum PlotBorderStyle
+  (in-module "GtkExtra")
+  (c-name "GtkPlotBorderStyle")
+  (gtype-id "TODO")
+  (values
+    '("none" "GTK_PLOT_BORDER_NONE")
+    '("line" "GTK_PLOT_BORDER_LINE")
+    '("shadow" "GTK_PLOT_BORDER_SHADOW")
+  )
+)
+
+(define-enum PlotLineStyle
+  (in-module "GtkExtra")
+  (c-name "GtkPlotLineStyle")
+  (gtype-id "TODO")
+  (values
+    '("none" "GTK_PLOT_LINE_NONE")
+    '("solid" "GTK_PLOT_LINE_SOLID")
+    '("dotted" "GTK_PLOT_LINE_DOTTED")
+    '("dashed" "GTK_PLOT_LINE_DASHED")
+    '("dot-dash" "GTK_PLOT_LINE_DOT_DASH")
+    '("dot-dot-dash" "GTK_PLOT_LINE_DOT_DOT_DASH")
+    '("dot-dash-dash" "GTK_PLOT_LINE_DOT_DASH_DASH")
+  )
+)
+
+(define-enum PlotConnector
+  (in-module "GtkExtra")
+  (c-name "GtkPlotConnector")
+  (gtype-id "TODO")
+  (values
+    '("none" "GTK_PLOT_CONNECT_NONE")
+    '("straight" "GTK_PLOT_CONNECT_STRAIGHT")
+    '("spline" "GTK_PLOT_CONNECT_SPLINE")
+    '("hv-step" "GTK_PLOT_CONNECT_HV_STEP")
+    '("vh-step" "GTK_PLOT_CONNECT_VH_STEP")
+    '("middle-step" "GTK_PLOT_CONNECT_MIDDLE_STEP")
+  )
+)
+
+(define-flags PlotLabelPos
+  (in-module "GtkExtra")
+  (c-name "GtkPlotLabelPos")
+  (gtype-id "TODO")
+  (values
+    '("none" "GTK_PLOT_LABEL_NONE")
+    '("in" "GTK_PLOT_LABEL_OUT")
+    '("out" "GTK_PLOT_LABEL_IN")
+  )
+)
+
+(define-enum PlotOrientation
+  (in-module "GtkExtra")
+  (c-name "GtkPlotOrientation")
+  (gtype-id "TODO")
+  (values
+    '("x" "GTK_PLOT_AXIS_X")
+    '("y" "GTK_PLOT_AXIS_Y")
+    '("z" "GTK_PLOT_AXIS_Z")
+  )
+)
+
+(define-enum PlotAxisPos
+  (in-module "GtkExtra")
+  (c-name "GtkPlotAxisPos")
+  (gtype-id "TODO")
+  (values
+    '("left" "GTK_PLOT_AXIS_LEFT")
+    '("right" "GTK_PLOT_AXIS_RIGHT")
+    '("top" "GTK_PLOT_AXIS_TOP")
+    '("bottom" "GTK_PLOT_AXIS_BOTTOM")
+  )
+)
+
+(define-enum PlotLabelStyle
+  (in-module "GtkExtra")
+  (c-name "GtkPlotLabelStyle")
+  (gtype-id "TODO")
+  (values
+    '("float" "GTK_PLOT_LABEL_FLOAT")
+    '("exp" "GTK_PLOT_LABEL_EXP")
+    '("pow" "GTK_PLOT_LABEL_POW")
+  )
+)
+
+(define-flags PlotTicksPos
+  (in-module "GtkExtra")
+  (c-name "GtkPlotTicksPos")
+  (gtype-id "TODO")
+  (values
+    '("none" "GTK_PLOT_TICKS_NONE")
+    '("in" "GTK_PLOT_TICKS_IN")
+    '("out" "GTK_PLOT_TICKS_OUT")
+  )
+)
+
+(define-flags "TODO"
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("h" "GTK_PLOT_GRADIENT_H")
+    '("v" "GTK_PLOT_GRADIENT_V")
+    '("s" "GTK_PLOT_GRADIENT_S")
+  )
+)
+
+(define-enum PlotPlane
+  (in-module "GtkExtra")
+  (c-name "GtkPlotPlane")
+  (gtype-id "TODO")
+  (values
+    '("xy" "GTK_PLOT_PLANE_XY")
+    '("yx" "GTK_PLOT_PLANE_YX")
+    '("xz" "GTK_PLOT_PLANE_XZ")
+    '("zx" "GTK_PLOT_PLANE_ZX")
+    '("yz" "GTK_PLOT_PLANE_YZ")
+    '("zy" "GTK_PLOT_PLANE_ZY")
+  )
+)
+
+(define-flags PlotSide
+  (in-module "GtkExtra")
+  (c-name "GtkPlotSide")
+  (gtype-id "TODO")
+  (values
+    '("xy" "GTK_PLOT_SIDE_XY")
+    '("xz" "GTK_PLOT_SIDE_XZ")
+    '("yx" "GTK_PLOT_SIDE_YX")
+    '("yz" "GTK_PLOT_SIDE_YZ")
+    '("zx" "GTK_PLOT_SIDE_ZX")
+    '("zy" "GTK_PLOT_SIDE_ZY")
+  )
+)
+
+(define-enum "TODO"
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("letter" "GTK_PLOT_LETTER")
+    '("legal" "GTK_PLOT_LEGAL")
+    '("a4" "GTK_PLOT_A4")
+    '("executive" "GTK_PLOT_EXECUTIVE")
+    '("custom" "GTK_PLOT_CUSTOM")
+  )
+)
+
+(define-enum "TODO"
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("letter-width" "GTK_PLOT_LETTER_W")
+    '("letter-height" "GTK_PLOT_LETTER_H")
+    '("legal-width" "GTK_PLOT_LEGAL_W")
+    '("legal-height" "GTK_PLOT_LEGAL_H")
+    '("a4-width" "GTK_PLOT_A4_W")
+    '("a4-height" "GTK_PLOT_A4_H")
+    '("executive-width" "GTK_PLOT_EXECUTIVE_W")
+    '("executive-height" "GTK_PLOT_EXECUTIVE_H")
+  )
+)
+
+(define-enum "TODO"
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("portrait" "GTK_PLOT_PORTRAIT")
+    '("landscape" "GTK_PLOT_LANDSCAPE")
+  )
+)
+
+(define-enum "TODO"
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("ps-points" "GTK_PLOT_PSPOINTS")
+    '("mm" "GTK_PLOT_MM")
+    '("cm" "GTK_PLOT_CM")
+    '("inches" "GTK_PLOT_INCHES")
+  )
+)
+
+(define-flags "TODO"
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("can-select" "GTK_PLOT_CANVAS_CAN_SELECT")
+    '("can-select-item" "GTK_PLOT_CANVAS_CAN_SELECT_ITEM")
+    '("can-select-point" "GTK_PLOT_CANVAS_CAN_SELECT_POINT")
+    '("can-dnd" "GTK_PLOT_CANVAS_CAN_DND")
+    '("can-dnd-point" "GTK_PLOT_CANVAS_CAN_DND_POINT")
+    '("dnd-flags" "GTK_PLOT_CANVAS_DND_FLAGS")
+  )
+)
+
+(define-flags "TODO"
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("frozen" "GTK_PLOT_CANVAS_FROZEN")
+    '("can-move" "GTK_PLOT_CANVAS_CAN_MOVE")
+    '("can-x-resize" "GTK_PLOT_CANVAS_CAN_X_RESIZE")
+    '("can-y-resize" "GTK_PLOT_CANVAS_CAN_Y_RESIZE")
+  )
+)
+
+(define-flags PlotCanvasArrow
+  (in-module "GtkExtra")
+  (c-name "GtkPlotCanvasArrow")
+  (gtype-id "TODO")
+  (values
+    '("none" "GTK_PLOT_ARROW_NONE")
+    '("origin" "GTK_PLOT_ARROW_ORIGIN")
+    '("end" "GTK_PLOT_ARROW_END")
+  )
+)
+
+(define-enum PlotCanvasType
+  (in-module "GtkExtra")
+  (c-name "GtkPlotCanvasType")
+  (gtype-id "TODO")
+  (values
+    '("none" "GTK_PLOT_CANVAS_NONE")
+    '("plot" "GTK_PLOT_CANVAS_PLOT")
+    '("axis" "GTK_PLOT_CANVAS_AXIS")
+    '("legends" "GTK_PLOT_CANVAS_LEGENDS")
+    '("title" "GTK_PLOT_CANVAS_TITLE")
+    '("text" "GTK_PLOT_CANVAS_TEXT")
+    '("data" "GTK_PLOT_CANVAS_DATA")
+    '("line" "GTK_PLOT_CANVAS_LINE")
+    '("rectangle" "GTK_PLOT_CANVAS_RECTANGLE")
+    '("ellipse" "GTK_PLOT_CANVAS_ELLIPSE")
+    '("pixmap" "GTK_PLOT_CANVAS_PIXMAP")
+    '("custom" "GTK_PLOT_CANVAS_CUSTOM")
+  )
+)
+
+(define-enum "TODO"
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("icon" "GTK_ICON_LIST_ICON")
+    '("text-right" "GTK_ICON_LIST_TEXT_RIGHT")
+    '("text-below" "GTK_ICON_LIST_TEXT_BELOW")
+  )
+)
+
+(define-enum "PlotBarUnits"
+  (in-module "GtkExtra")
+  (c-name "GtkPlotBarUnits")
+  (gtype-id "TODO")
+  (values
+    '("points" "GTK_PLOT_BAR_POINTS")
+    '("relative" "GTK_PLOT_BAR_RELATIVE")
+    '("absolute" "GTK_PLOT_BAR_ABSOLUTE")
+  )
+)

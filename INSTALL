@@ -1,0 +1,36 @@
+Installation Instructions
+
+The simplest way to build this package is:
+
+  1. Make sure that the GIMP Toolkit, the GtkExtra widget set, the
+     Python interpreter, Numerical Python and PyGTK are installed.
+     The README file contains information on how to obtain these
+     packages.
+
+  2. Build and install the shared library and the Python module:
+
+     python setup.py install
+
+     You can build RPM packages with:
+
+     python setup.py bdist_rpm
+
+     Read the document "Installing Python Modules" that comes with
+     Python for more information.
+
+  3. Run the example programs
+
+     cd examples
+     ./testgtksheet.py
+     ./testgtkplot.py
+     ./testboxes.py
+     ./testbubbles.py
+     ./testflux.py
+     ./testpolar.py
+     ./testgtkplot3d.py
+     ./testcontour.py
+     ./testrealtime.py
+     ./testgtkiconlist.py
+     ./testgtkfilesel.py
+     ./testgtkfont.py
+     cd ..
