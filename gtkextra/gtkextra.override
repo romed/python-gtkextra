@@ -822,6 +822,29 @@ _wrap_gtk_plot_data_new(PyGtk_Object *self, PyObject *args)
 		pygtkextra_plot_data_register_plot_function(GTK_PLOT_DATA(widget),
 							    function, extra);
 	    Py_DECREF(extra);
+	} else if (PyTuple_Check(function)) {
+	    PyObject *extra, *iterator;
+	    int n, mask;
+
+	    if (!PyArg_ParseTuple(function, "Oii:gtk_plot_data_new", &iterator,
+				  &n, &mask)) {
+		return NULL;
+	    }
+	    if (!PyCallable_Check(iterator)) {
+		PyErr_SetString(PyExc_TypeError, "iterator must be callable");
+		return NULL;
+	    }
+	    extra = PyTuple_GetSlice(args, 1, num_args);
+	    if (!extra)
+		return NULL;
+	    widget =
+		gtk_plot_data_new_iterator((GtkPlotIterator)
+					   pygtkextra_plot_data_call_plot_iterator,
+					   n, mask);
+	    if (widget)
+		pygtkextra_plot_data_register_plot_iterator(GTK_PLOT_DATA(widget),
+							    iterator, extra);
+	    Py_DECREF(extra);
 	} else if (PyCObject_Check(function)) {
 	    if (num_args > 1) {
 		PyErr_SetString(PyExc_TypeError,
@@ -860,10 +883,14 @@ _wrap_gtk_plot_data_set_points(PyGtk_Object *self, PyObject *args,
     PyObject *x, *y, *dx = Py_None, *dy = Py_None;
     int n = -1;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "OO|OOi:GtkPlotData.set_points", kwlist,
-				     &x, &y, &dx, &dy, &n))
-        return NULL;
+    if (!PyArg_ParseTuple(args, "(OOOOi):GtkPlotData.set_points",
+			  &x, &y, &dx, &dy, &n)) {
+	PyErr_Clear();
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+					 "OO|OOi:GtkPlotData.set_points",
+					 kwlist, &x, &y, &dx, &dy, &n))
+	    return NULL;
+    }
     return pygtkextra_plot_data_set_points(GTK_PLOT_DATA(self->obj),
 					   x, y, dx, dy, n);
 }
@@ -875,6 +902,29 @@ _wrap_gtk_plot_data_get_points(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, ":GtkPlotData.get_points"))
         return NULL;
     return pygtkextra_plot_data_get_points(GTK_PLOT_DATA(self->obj));
+}
+%%
+override gtk_plot_data_get_point
+static PyObject *
+_wrap_gtk_plot_data_get_point(PyObject *self, PyObject *args)
+{
+    int i;
+    gdouble x = 0.0, y = 0.0, z = 0.0, a = 0.0, dx = 0.0, dy = 0.0,
+	dz = 0.0, da = 0.0;
+    gchar *label = NULL;
+    gboolean error;
+
+    if (!PyArg_ParseTuple(args, "i:GtkPlotData.get_point", &i))
+        return NULL;
+    gtk_plot_data_get_point(GTK_PLOT_DATA(self->obj), i, &x, &y, &z, &a,
+			    &dx, &dy, &dz, &da, &label, &error);
+    if (error) {
+	Py_INCREF(Py_None);
+	return Py_None;
+    }
+    return Py_BuildValue("(dddddddds)", (double) x, (double) y, (double) z,
+			 (double) a, (double) dx, (double) dy, (double) dz,
+			 (double) da, label);
 }
 %%
 override gtk_plot_data_set_numpoints kwargs
@@ -1173,12 +1223,14 @@ static PyObject *
 _wrap_gtk_plot_data_get_gradient(PyObject *self, PyObject *args)
 {
     gdouble min, max;
-    gint levels;
+    gint levels, sublevels;
 
     if (!PyArg_ParseTuple(args, ":GtkPlotData.get_gradient"))
 	return NULL;
-    gtk_plot_data_get_gradient(GTK_PLOT_DATA(self->obj), &min, &max, &levels);
-    return Py_BuildValue("(ddi)", (double) min, (double) max, (int) levels);
+    gtk_plot_data_get_gradient(GTK_PLOT_DATA(self->obj), &min, &max, &levels,
+			       &sublevels);
+    return Py_BuildValue("(ddii)", (double) min, (double) max, (int) levels,
+			 (int) sublevels);
 }
 %%
 override gtk_plot_data_get_gradient_level kwargs
@@ -1255,6 +1307,38 @@ _wrap_gtk_plot_data_remove_link(PyObject *self, PyObject *args)
     gtk_plot_data_remove_link(GTK_PLOT_DATA(self->obj));
     Py_INCREF(Py_None);
     return Py_None;
+}
+%%
+override gtk_plot_data_add_marker
+static PyObject *
+_wrap_gtk_plot_data_add_marker(PyObject *self, PyObject *args)
+{
+    int i;
+    GtkPlotMarker *marker;
+
+    if (!PyArg_ParseTuple(args, "i:GtkPlotData.add_marker", &i))
+	return NULL;
+    marker = gtk_plot_data_add_marker(GTK_PLOT_DATA(self->obj), i);
+    if (marker)
+	return PyCObject_FromVoidPtr(marker, NULL);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gtk_plot_data_remove_marker
+static PyObject *
+_wrap_gtk_plot_data_remove_marker(PyObject *self, PyObject *args)
+{
+    PyObject *py_marker;
+    GtkPlotMarker *marker;
+    gboolean ok;
+
+    if (!PyArg_ParseTuple(args, "O!:gtk_plot_data_remove_marker",
+			  &PyCObject_Type, &py_marker))
+	return NULL;
+    marker = PyCObject_AsVoidPtr(py_marker);
+    ok = gtk_plot_data_remove_marker(GTK_PLOT_DATA(self->obj), marker);
+    return PyInt_FromLong(ok);
 }
 %%
 override gtk_plot_bar_new kwargs
@@ -1408,11 +1492,15 @@ _wrap_gtk_plot_surface_set_points(PyObject *self, PyObject *args,
     PyObject *x, *y, *z, *dx, *dy, *dz;
     int nx, ny;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-				     "OOOOOOii:GtkPlotSurface.set_points",
-				     kwlist, &x, &y, &z, &dx, &dy, &dz, &nx,
-				     &ny))
-        return NULL;
+    if (!PyArg_ParseTuple(args, "(OOOOOOii):GtkPlotSurface.set_points",
+			  &x, &y, &z, &dx, &dy, &dz, &nx, &ny)) {
+	PyErr_Clear();
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+					 "OOOOOOii:GtkPlotSurface.set_points",
+					 kwlist, &x, &y, &z, &dx, &dy, &dz,
+					 &nx, &ny))
+	    return NULL;
+    }
     return pygtkextra_plot_surface_set_points(GTK_PLOT_SURFACE(self->obj),
 					      x, y, z, dx, dy, dz, nx, ny);
 }
@@ -1745,6 +1833,8 @@ _wrap_gtk_plot_new(PyGtk_Object *self, PyObject *args, PyObject *kwargs)
 }
 %%
 ignore gtk_plot_new_with_size
+%%
+ignore gtk_plot_set_pc
 %%
 override gtk_plot_get_position
 static PyObject *
@@ -2453,6 +2543,8 @@ _wrap_gtk_plot3d_minor_zgrid_get_attributes(PyObject *self, PyObject *args)
 					  &line_color);
     return pygtkextra_plot_line_new(line_style, line_width, &line_color);
 }
+%%
+ignore gtk_plot_canvas_set_pc
 %%
 override gtk_plot_canvas_get_active_point
 static PyObject *

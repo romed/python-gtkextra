@@ -1,6 +1,6 @@
 # Python bindings for the GtkExtra widget set
 #
-# Copyright (C) 2000-2001 Andreas Voegele
+# Copyright (C) 2000-2002 Andreas Voegele
 #
 # The documentation is based on the GtkAda documentation and used by
 # permission.  GtkAda is available at http://gtkada.eu.org/ and
@@ -59,6 +59,17 @@ SHEET_JUSTIFY_ENTRY = 1 << 15
 PLOT_BAR_POINTS = 0
 PLOT_BAR_RELATIVE = 1
 PLOT_BAR_ABSOLUTE = 2
+
+# plot data iterator mask
+PLOT_DATA_X = 1 << 0
+PLOT_DATA_Y = 1 << 1
+PLOT_DATA_Z = 1 << 2
+PLOT_DATA_A = 1 << 3
+PLOT_DATA_DX = 1 << 4
+PLOT_DATA_DY = 1 << 5
+PLOT_DATA_DZ = 1 << 6
+PLOT_DATA_DA = 1 << 7
+PLOT_DATA_LABELS = 1 << 8
 
 # plot scale type
 PLOT_SCALE_LINEAR = 0
@@ -202,6 +213,15 @@ PLOT_ARROW_NONE = 0
 PLOT_ARROW_ORIGIN = 1 << 0
 PLOT_ARROW_END = 1 << 1
 
+# plot canvas selection
+PLOT_CANVAS_SELECT_NONE = 0
+PLOT_CANVAS_SELECT_MARKERS = 1
+PLOT_CANVAS_SELECT_TARGET = 2
+
+# plot canvas selection mode
+PLOT_CANVAS_SELECT_CLICK_1 = 0
+PLOT_CANVAS_SELECT_CLICK_2 = 2
+
 # plot canvas item type
 PLOT_CANVAS_NONE = 0
 PLOT_CANVAS_PLOT = 1
@@ -214,7 +234,8 @@ PLOT_CANVAS_LINE = 7
 PLOT_CANVAS_RECTANGLE = 8
 PLOT_CANVAS_ELLIPSE = 9
 PLOT_CANVAS_PIXMAP = 10
-PLOT_CANVAS_CUSTOM = 11
+PLOT_CANVAS_MARKER = 11
+PLOT_CANVAS_CUSTOM = 12
 
 # icon list mode
 ICON_LIST_ICON = 0
@@ -291,9 +312,28 @@ class GtkSheet(_gtk.GtkContainer):
 		if entry_widget:
 			entry_widget = _gtk._obj2inst(entry_widget)
 		return entry_widget
+	def get_entry_widget(self):
+		"""Return the widget used to modify the contents of the cells.
+		"""
+		entry_widget = _gtkextra.gtk_sheet_get_entry_widget(self._o)
+		if entry_widget:
+			entry_widget = _gtk._obj2inst(entry_widget)
+		return entry_widget
 	def set_title(self, title):
 		"""Change the title of the sheet."""
 		_gtkextra.gtk_sheet_set_title(self._o, title)
+	def set_background(self, color):
+		"""Set the sheet's background color."""
+		_gtkextra.gtk_sheet_set_background(self._o, color)
+	def set_grid(self, color):
+		"""Set the sheet's grid color."""
+		_gtkextra.gtk_sheet_set_grid(self._o, color)
+	def show_grid(self, visible):
+		"""Change the visibility of the grid."""
+		_gtkextra.gtk_sheet_show_grid(self._o, visible)
+	def grid_visible(self):
+		"""Check if the grid is visible."""
+		return _gtkextra.gtk_sheet_grid_visible(self._o)
 	def freeze(self):
 		"""Freeze all visual updates of the sheet until you thaw it.
 		The update will occur in a more efficient way.
@@ -683,14 +723,24 @@ class GtkPlotData(_gtk.GtkWidget):
 		self._o = _gtkextra.gtk_plot_data_new(function, extra)
 	def paint(self):
 		_gtkextra.gtk_plot_data_paint(self._o)
+	def update(self):
+		_gtkextra.gtk_plot_data_update(self._o)
 	def draw_points(self, n):
 		_gtkextra.gtk_plot_data_draw_points(self._o, n)
 	def draw_symbol(self, x, y):
 		_gtkextra.gtk_plot_data_draw_symbol(self._o, x, y)
-	def set_points(self, x, y, dx=None, dy=None, n=-1):
-		_gtkextra.gtk_plot_data_set_points(self._o, x, y, dx, dy, n)
+	def set_points(self, *args):
+		"""Set the X, Y, DX and DY arrays and the number of points.
+		The arguments can be passed individually or in a 5-tuple.
+		"""
+		apply(_gtkextra.gtk_plot_data_set_points, (self._o,) + args)
 	def get_points(self):
+		"""Return a 5-tuple that contains the X, Y, DX and DY arrays
+		and the number of points.
+		"""
 		return _gtkextra.gtk_plot_data_get_points(self._o)
+	def get_point(self, i):
+		return _gtkextra.gtk_plot_data_get_point(self._o, i)
 	def set_numpoints(self, n):
 		_gtkextra.gtk_plot_data_set_numpoints(self._o, n)
 	def get_numpoints(self):
@@ -727,6 +777,10 @@ class GtkPlotData(_gtk.GtkWidget):
 		_gtkextra.gtk_plot_data_set_da(self._o, array)
 	def get_da(self):
 		return _gtkextra.gtk_plot_data_get_da(self._o)
+	def set_a_scale(self, scale):
+		_gtkextra.gtk_plot_data_set_a_scale(self._o, scale)
+	def get_a_scale(self):
+		return _gtkextra.gtk_plot_data_get_a_scale(self._o)
 	def set_labels(self, labels):
 		_gtkextra.gtk_plot_data_set_da(self._o, labels)
 	def get_labels(self):
@@ -808,6 +862,14 @@ class GtkPlotData(_gtk.GtkWidget):
 		_gtkextra.gtk_plot_data_gradient_set_visible(self._o, visible)
 	def gradient_visible(self):
 		return _gtkextra.gtk_plot_data_gradient_visible(self._o)
+	def draw_gradient(self, x, y):
+		_gtkextra.gtk_plot_data_draw_gradient(self._o, x, y)
+	def gradient_autoscale_a(self):
+		_gtkextra.gtk_plot_data_gradient_autoscale_a(self._o)
+	def gradient_autoscale_da(self):
+		_gtkextra.gtk_plot_data_gradient_autoscale_da(self._o)
+	def gradient_autoscale_z(self):
+		_gtkextra.gtk_plot_data_gradient_autoscale_z(self._o)
 	def gradient_get_visible(self):
 		return self.gradient_visible()
 	def set_gradient_colors(self, min_color, max_color):
@@ -816,8 +878,9 @@ class GtkPlotData(_gtk.GtkWidget):
 							    max_color)
 	def get_gradient_colors(self):
 		return _gtkextra.gtk_plot_data_get_gradient_colors(self._o)
-	def set_gradient(self, min, max, levels):
-		_gtkextra.gtk_plot_data_set_gradient(self._o, min, max, levels)
+	def set_gradient(self, min, max, levels, sublevels=0):
+		_gtkextra.gtk_plot_data_set_gradient(self._o, min, max, levels,
+						     sublevels)
 	def get_gradient(self):
 		return _gtkextra.gtk_plot_data_get_gradient(self._o)
 	def get_gradient_level(self, level):
@@ -829,6 +892,16 @@ class GtkPlotData(_gtk.GtkWidget):
 		return _gtkextra.gtk_plot_data_get_link(self._o);
 	def remove_link(self):
 		_gtkextra.gtk_plot_data_remove_link(self._o);
+	def add_marker(self, i):
+		return _gtkextra.gtk_plot_data_add_marker(self._o, i)
+	def remove_marker(self, marker):
+		return _gtkextra.gtk_plot_data_remove_marker(self._o, marker)
+	def remove_markers(self):
+		_gtkextra.gtk_plot_data_remove_markers(self._o)
+	def show_markers(self, visible):
+		_gtkextra.gtk_plot_data_show_markers(self._o, visible)
+	def markers_visible(self):
+		return _gtkextra.gtk_plot_data_markers_visible(self._o)
 _gtk._name2cls['GtkPlotData'] = GtkPlotData
 
 class GtkPlotBar(GtkPlotData):
@@ -902,10 +975,22 @@ class GtkPlotSurface(GtkPlotData):
 		_gtkextra.gtk_plot_surface_set_light(self._o, x, y, z)
 	def set_ambient(self, ambient):
 		_gtkextra.gtk_plot_surface_set_ambient(self._o, ambient)
-	def set_points(self, x, y, z, dx, dy, dz, nx, ny):
-		_gtkextra.gtk_plot_surface_set_points(self._o, x, y, z, dx, dy,
-						      dz, nx, ny)
+	def use_height_gradient(self, use_gradient):
+		_gtkextra.gtk_plot_surface_use_height_gradient(self._o,
+							       use_gradient)
+	def set_transparent(self, transparent):
+		_gtkextra.gtk_plot_surface_set_transparent(self._o,
+							   transparent)
+	def set_points(self, *args):
+		"""Set the X, Y, Z, DX, DY and DY arrays and the number of
+		points on the X and the Y axis.  The arguments can be passed
+		individually or in a 8-tuple.
+		"""
+		apply(_gtkextra.gtk_plot_surface_set_points, (self._o,) + args)
 	def get_points(self):
+		"""Return a 8-tuple that contains the X, Y, Z, DX, DY and DZ
+		arrays and the number of points on the X and the Y axis.
+		"""
 		return _gtkextra.gtk_plot_surface_get_points(self._o)
 	def set_nx(self, nx):
 		_gtkextra.gtk_plot_surface_set_nx(self._o, nx)
@@ -947,6 +1032,10 @@ class GtkPlotSurface(GtkPlotData):
 		_gtkextra.gtk_plot_surface_set_ystep(self._o, ystep)
 	def get_ystep(self):
 		_gtkextra.gtk_plot_surface_get_ystep(self._o)
+	def build_mesh(self):
+		_gtkextra.gtk_plot_surface_build_mesh(self._o)
+	def recalc_nodes(self):
+		_gtkextra.gtk_plot_surface_recalc_nodes(self._o)
 _gtk._name2cls['GtkPlotSurface'] = GtkPlotSurface
 
 class GtkPlotCSurface(GtkPlotSurface):
@@ -1315,6 +1404,11 @@ class GtkPlot(_gtk.GtkWidget):
 		_gtkextra.gtk_plot_axis_set_labels_numbers(self._o, axis,
 							   label_style,
 							   precision)
+	def axis_set_labels_offset(self, axis, offset):
+		_gtkextra.gtk_plot_axis_set_labels_offset(self._o, axis,
+							  offset)
+	def axis_get_labels_offset(self, axis):
+		return _gtkextra.gtk_plot_axis_get_labels_offset(self._o, axis)
 	def axis_labels_set_numbers(self, axis, label_style, precision):
 		"""Obsolete, use axis_set_labels_numbers() instead."""
 		self.axis_set_labels_numbers(axis, label_style, precision)
@@ -1756,6 +1850,13 @@ class GtkPlotCanvas(_gtk.GtkFixed):
 		_gtkextra.gtk_plot_canvas_paint(self._o)
 	def refresh(self):
 		_gtkextra.gtk_plot_canvas_refresh(self._o)
+	def freeze(self):
+		"""Freeze all visual updates of the canvas until you thaw it.
+		"""
+		_gtkextra.gtk_plot_canvas_freeze(self._o)
+	def thaw(self):
+		"""Thaw the sheet so that visual updates occur again.
+		"""
 	def remove_child(self, child):
 		return _gtkextra.gtk_plot_canvas_remove_child(self._o, child)
 	def set_active_plot(self, plot):
@@ -1918,6 +2019,7 @@ class GtkIconFileSelection(_gtk.GtkWindow):
 		'path_label': _gtkextra.gtk_icon_file_selection_get_path_label,
 		'dir_tree': _gtkextra.gtk_icon_file_selection_get_dir_tree,
 		'file_list': _gtkextra.gtk_icon_file_selection_get_file_list,
+		'history_combo': _gtkextra.gtk_icon_file_selection_get_history_combo,
 		'file_entry': _gtkextra.gtk_icon_file_selection_get_file_entry,
 		'filter_entry': _gtkextra.gtk_icon_file_selection_get_filter_entry,
 		'ok_button': _gtkextra.gtk_icon_file_selection_get_ok_button,

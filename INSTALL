@@ -11,8 +11,9 @@ The simplest way to build this package is:
 
      python setup.py install
 
-     You can build RPM packages with:
+     You can build Tar and RPM archives with:
 
+     python setup.py bdist
      python setup.py bdist_rpm
 
      Read the document "Installing Python Modules" that comes with
@@ -21,16 +22,16 @@ The simplest way to build this package is:
   3. Run the example programs
 
      cd examples
-     ./testgtksheet.py
-     ./testgtkplot.py
-     ./testboxes.py
-     ./testbubbles.py
-     ./testflux.py
-     ./testpolar.py
-     ./testgtkplot3d.py
-     ./testcontour.py
-     ./testrealtime.py
-     ./testgtkiconlist.py
-     ./testgtkfilesel.py
-     ./testgtkfont.py
+     python testgtksheet.py
+     python testgtkplot.py
+     python testboxes.py
+     python testbubbles.py
+     python testflux.py
+     python testpolar.py
+     python testgtkplot3d.py
+     python testcontour.py
+     python testrealtime.py
+     python testgtkiconlist.py
+     python testgtkfilesel.py
+     python testgtkfont.py
      cd ..

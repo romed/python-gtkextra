@@ -86,10 +86,10 @@
 (define-method get_justification
   (of-object "GtkItemEntry")
   (c-name "gtk_item_entry_get_justification")
-  (return-type "int")
+  (return-type "GtkJustification")
 )
 
-(define-enum "TODO"
+(define-enum TODO
   (in-module "GtkExtra")
   (c-name "TODO")
   (gtype-id "TODO")
@@ -101,7 +101,7 @@
   )
 )
 
-(define-flags "TODO"
+(define-flags TODO
   (in-module "GtkExtra")
   (c-name "TODO")
   (gtype-id "TODO")
@@ -113,7 +113,7 @@
   )
 )
 
-(define-flags "TODO"
+(define-flags TODO
   (in-module "GtkExtra")
   (c-name "TODO")
   (gtype-id "TODO")
@@ -133,6 +133,23 @@
     '("column-titles-visible" "GTK_SHEET_COL_TITLES_VISIBLE")
     '("auto-scroll" "GTK_SHEET_AUTO_SCROLL")
     '("justify-entry" "GTK_SHEET_JUSTIFY_ENTRY")
+  )
+)
+
+(define-flags TODO
+  (in-module "GtkExtra")
+  (c-name "TODO")
+  (gtype-id "TODO")
+  (values
+    '("x" "GTK_PLOT_DATA_X")
+    '("y" "GTK_PLOT_DATA_Y")
+    '("z" "GTK_PLOT_DATA_Z")
+    '("a" "GTK_PLOT_DATA_A")
+    '("dx" "GTK_PLOT_DATA_DX")
+    '("dy" "GTK_PLOT_DATA_DY")
+    '("dz" "GTK_PLOT_DATA_DZ")
+    '("da" "GTK_PLOT_DATA_DA")
+    '("labels" "GTK_PLOT_DATA_LABELS")
   )
 )
 
@@ -274,7 +291,7 @@
   )
 )
 
-(define-flags "TODO"
+(define-flags TODO
   (in-module "GtkExtra")
   (c-name "TODO")
   (gtype-id "TODO")
@@ -313,7 +330,7 @@
   )
 )
 
-(define-enum "TODO"
+(define-enum TODO
   (in-module "GtkExtra")
   (c-name "TODO")
   (gtype-id "TODO")
@@ -326,7 +343,7 @@
   )
 )
 
-(define-enum "TODO"
+(define-enum TODO
   (in-module "GtkExtra")
   (c-name "TODO")
   (gtype-id "TODO")
@@ -342,7 +359,7 @@
   )
 )
 
-(define-enum "TODO"
+(define-enum TODO
   (in-module "GtkExtra")
   (c-name "TODO")
   (gtype-id "TODO")
@@ -352,7 +369,7 @@
   )
 )
 
-(define-enum "TODO"
+(define-enum TODO
   (in-module "GtkExtra")
   (c-name "TODO")
   (gtype-id "TODO")
@@ -364,7 +381,7 @@
   )
 )
 
-(define-flags "TODO"
+(define-flags TODO
   (in-module "GtkExtra")
   (c-name "TODO")
   (gtype-id "TODO")
@@ -378,7 +395,7 @@
   )
 )
 
-(define-flags "TODO"
+(define-flags TODO
   (in-module "GtkExtra")
   (c-name "TODO")
   (gtype-id "TODO")
@@ -417,11 +434,33 @@
     '("rectangle" "GTK_PLOT_CANVAS_RECTANGLE")
     '("ellipse" "GTK_PLOT_CANVAS_ELLIPSE")
     '("pixmap" "GTK_PLOT_CANVAS_PIXMAP")
+    '("marker" "GTK_PLOT_CANVAS_MARKER")
     '("custom" "GTK_PLOT_CANVAS_CUSTOM")
   )
 )
 
-(define-enum "TODO"
+(define-enum PlotCanvasSelection
+  (in-module "GtkExtra")
+  (c-name "GtkPlotCanvasSelection")
+  (gtype-id "TODO")
+  (values
+    '("none" "GTK_PLOT_CANVAS_SELECT_NONE")
+    '("markers" "GTK_PLOT_CANVAS_SELECT_MARKERS")
+    '("target" "GTK_PLOT_CANVAS_SELECT_TARGET")
+  )
+)
+
+(define-enum PlotCanvasSelectionMode
+  (in-module "GtkExtra")
+  (c-name "GtkPlotCanvasSelectionMode")
+  (gtype-id "TODO")
+  (values
+    '("click-1" "GTK_PLOT_CANVAS_SELECT_CLICK_1")
+    '("click-2" "GTK_PLOT_CANVAS_SELECT_CLICK_2")
+  )
+)
+
+(define-enum TODO
   (in-module "GtkExtra")
   (c-name "TODO")
   (gtype-id "TODO")

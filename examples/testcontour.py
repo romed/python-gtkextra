@@ -29,7 +29,8 @@ class Application(GtkWindow):
         surface.set_xstep(0.025)
         surface.set_ystep(0.025)
         surface.set_legend("cos ((r-r\\s0\\N)\\S2\\N)")
-        surface.set_gradient(0.2, 0.8, 6)
+        surface.set_gradient(0.2, 0.8, 6, 3)
+        surface.set_lines_visible(FALSE)
         plot.add_data(surface)
 
         plot = GtkPlot(width=0.4, height=0.4)
@@ -41,7 +42,7 @@ class Application(GtkWindow):
         surface.set_xstep(0.025)
         surface.set_ystep(0.025)
         surface.set_legend("cos ((r-r\\s0\\N)\\S2\\N)")
-        surface.set_gradient(0.2, 0.8, 6)
+        surface.set_gradient(0.2, 0.8, 6, 0)
         surface.set_grid_visible(FALSE)
         surface.set_lines_only(TRUE)
         plot.add_data(surface)

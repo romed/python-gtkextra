@@ -35,9 +35,29 @@ static const gchar *array_types_key  =
 static const char *axis_name[] = { "X", "Y", "Z", "A",
 				   "DX", "DY", "DZ", "DA" };
 
+#define PLOT_FUNCTION_TYPE_PLOT 0
+#define PLOT_FUNCTION_TYPE_PLOT3D 1
+#define PLOT_FUNCTION_TYPE_ITERATOR 2
+
+static char *
+get_ordinal_suffix(int i)
+{
+    switch (i % 10) {
+    case 1:
+	return "st";
+    case 2:
+	return "nd";
+    case 3:
+	return "rd";
+    default:
+	return "th";
+    }
+}
+
 /*
  * pygtkextra_plot_data_register_plot_function
  * pygtkextra_plot_data_register_plot3d_function
+ * pygtkextra_plot_data_register_plot_iterator
  *
  * Associates a Python plot function and its arguments with a
  * GtkPlotData instance.  Must be called internally when a plot
@@ -48,24 +68,46 @@ static gboolean
 pygtkextra_plot_data_register_plot_function_real(GtkPlotData *data,
 						 PyObject *function,
 						 PyObject *extra,
-						 int num_values)
+						 int type)
 {
-    int i, len;
-    PyObject *args, **vector;
-	
+    int i, len, num_values;
+    PyObject *args, *value, **vector;
+
+    switch (type) {
+    case PLOT_FUNCTION_TYPE_PLOT:
+    case PLOT_FUNCTION_TYPE_ITERATOR:
+	num_values = 1;
+	break;
+    case PLOT_FUNCTION_TYPE_PLOT3D:
+	num_values = 2;
+	break;
+    }
+    
     /* Create a tuple for the plot function's arguments. */
     len = (extra) ? PyTuple_Size(extra) : 0;
     args = PyTuple_New(num_values + len);
     if (!args)
 	return FALSE;
-    /* Create the X and Y values. */
-    for (i = 0; i < num_values; ++i) {
-	PyObject *value = PyFloat_FromDouble(0.0);
+    switch (type) {
+    case PLOT_FUNCTION_TYPE_PLOT:
+    case PLOT_FUNCTION_TYPE_PLOT3D:
+	for (i = 0; i < num_values; ++i) {
+	    value = PyFloat_FromDouble(0.0);
+	    if (!value) {
+		Py_DECREF(args);
+		return FALSE;
+	    }
+	    PyTuple_SET_ITEM(args, i, value);
+	}
+	break;
+    case PLOT_FUNCTION_TYPE_ITERATOR:
+	value = PyInt_FromLong(0);
 	if (!value) {
 	    Py_DECREF(args);
 	    return FALSE;
 	}
 	PyTuple_SET_ITEM(args, i, value);
+	break;
     }
     /* Copy the extra arguments. */
     for (i = 0; i < len; ++i) {
@@ -92,7 +134,8 @@ pygtkextra_plot_data_register_plot_function(GtkPlotData *data,
 					    PyObject *extra)
 {
     return pygtkextra_plot_data_register_plot_function_real(data, function,
-							    extra, 1);
+							    extra,
+							    PLOT_FUNCTION_TYPE_PLOT);
 }
 
 gboolean
@@ -101,34 +144,39 @@ pygtkextra_plot_data_register_plot3d_function(GtkPlotData *data,
 					      PyObject *extra)
 {
     return pygtkextra_plot_data_register_plot_function_real(data, function,
-							    extra, 2);
+							    extra,
+							    PLOT_FUNCTION_TYPE_PLOT3D);
+}
+
+gboolean
+pygtkextra_plot_data_register_plot_iterator(GtkPlotData *data,
+					    PyObject *function,
+					    PyObject *extra)
+{
+    return pygtkextra_plot_data_register_plot_function_real(data, function,
+							    extra,
+							    PLOT_FUNCTION_TYPE_ITERATOR);
 }
 
 
 /*
  * pygtkextra_plot_data_call_plot_function
  * pygtkextra_plot_data_call_plot3d_function
+ * pygtkextra_plot_data_call_plot_iterator
  *
  * Calls the Python plot function belonging to a GtkPlotData instance.  This
  * function must be used as the C plot function when a plot function is
  * created with GtkPlotData.__init__(), GtkPlot.add_function() etc.
  *
- * 2-D Python plot functions get an X value and all the extra arguments that
- * were passed to GtkPlotData.__init__() or GtkPlot.add_function().  The plot
- * function should return the Y value or None, if it isn't possible to
- * calculate the Y value.
+ * 2-D plot functions get an X value and all the extra arguments that
+ * were passed to GtkPlotData.__init__() or GtkPlot.add_function().
+ * The plot function should return the Y value or None, if it isn't
+ * possible to calculate the Y value.
  *
- * 3-D Python plot functions get two values and should return the Z value or
- * None.
+ * 3-D plot functions get X and Y and return Z or None.
  *
- * Example:
- *
- *  def tangent(x, factor, summand):
- *      try:
- *          return factor * math.tan(x) + summand
- *      except:
- *          return None
- *  plot.add_function(tangent, 0.5, 1.0)
+ * Iterators get the number of the point and return a tuple of 8 or 9
+ * values, ie. (X, Y, Z, A, DX, DY, DZ, DA[, LABEL]) or None.
  */
 gdouble
 pygtkextra_plot_data_call_plot_function(GtkPlot *plot, GtkPlotData *data,
@@ -161,7 +209,6 @@ pygtkextra_plot_data_call_plot_function(GtkPlot *plot, GtkPlotData *data,
 	goto cleanup;
     PyTuple_SetItem(args, 0, value);
     */
-    /* The following code is faster than the commented code above. */
     value = PyTuple_GET_ITEM(args, 0);
     ((PyFloatObject *) value)->ob_fval = x;
 
@@ -233,7 +280,6 @@ pygtkextra_plot_data_call_plot3d_function(GtkPlot *plot, GtkPlotData *data,
 	goto cleanup;
     PyTuple_SetItem(args, 1, value);
     */
-    /* The following code is faster than the commented code above. */
     value = PyTuple_GET_ITEM(args, 0);
     ((PyFloatObject *) value)->ob_fval = x;
     value = PyTuple_GET_ITEM(args, 1);
@@ -269,6 +315,119 @@ cleanup:
     PyGtk_UnblockThreads();
 
     return z;
+}
+
+void
+pygtkextra_plot_data_call_plot_iterator(GtkPlot *plot, GtkPlotData *data,
+					gint iter,
+					gdouble *out_x, 
+					gdouble *out_y, 
+					gdouble *out_z,
+					gdouble *out_a,
+					gdouble *out_dx, 
+					gdouble *out_dy, 
+					gdouble *out_dz,
+					gdouble *out_da,
+					gchar **out_label,
+					gboolean *out_error)
+{
+    PyObject **vector, *function, *args, *value, *result;
+
+    PyGtk_BlockThreads();
+
+    *out_error = TRUE;
+
+    /* Get the Python function and the argument tuple that belong to
+       the given GtkPlotData instance. */
+    vector = (PyObject **) gtk_object_get_data(GTK_OBJECT(data),
+					       plot_function_key);
+    if (!vector) {
+	PyErr_SetString(PyExc_RuntimeError, "cannot find plot function");
+	goto cleanup;
+    }
+    function = vector[0];
+    args = vector[1];
+
+    /* Put the index into the first item of the argument tuple. */
+    /*
+    value = PyInt_FromLong(iter);
+    if (!value)
+	goto cleanup;
+    PyTuple_SetItem(args, 0, value);
+    */
+    value = PyTuple_GET_ITEM(args, 0);
+    ((PyIntObject *) value)->ob_ival = iter;
+
+    /* Call the Python function. */
+    result = PyEval_CallObject(function, args);
+    if (!result)
+	goto cleanup;
+
+    if (PySequence_Check(result)) {
+	int n = PySequence_Length(result);
+	if (n < 8 || n > 9) {
+	    PyErr_SetString(PyExc_TypeError,
+			    "plot iterator must return 9-sequence or None");
+	} else {
+	    int i;
+	    gdouble *v[8];
+	    PyObject *item;
+
+	    v[0] = out_x; v[1] = out_y; v[2] = out_z; v[3] = out_a;
+	    v[4] = out_dx; v[5] = out_dy; v[6] = out_dz; v[7] = out_da;
+	    *out_error = FALSE;
+	    for (i = 0; i < 8; ++i) {
+		item = PySequence_GetItem(result, i);
+		if (item == Py_None) {
+		    *v[i] = 0.0;
+		} else if (PyFloat_Check(item)) {
+		    *v[i] = PyFloat_AS_DOUBLE(item);
+		} else if (PyNumber_Check(item)
+			   && (value = PyNumber_Float(item))) {
+		    *v[i] = PyFloat_AS_DOUBLE(value);
+		    Py_DECREF(value);
+		} else {
+		    gchar buf[256];
+
+		    *out_error = TRUE;
+		    g_snprintf(buf, sizeof(buf),
+			       "%d%s item must be number or None",
+			       i + 1, get_ordinal_suffix(i + 1));
+		    PyErr_SetString(PyExc_TypeError, buf);
+		    Py_XDECREF(item);
+		    Py_DECREF(result);
+		    goto cleanup;
+		}
+		Py_XDECREF(item);
+	    }
+	    *out_label = NULL;
+	    if (n >= 9) {
+		item = PySequence_GetItem(result, 8);
+		if (PyString_Check(item)) {
+		    *out_label = PyString_AS_STRING(item);
+		} else if (item != Py_None) {
+		    *out_error = TRUE;
+		    PyErr_SetString(PyExc_TypeError,
+				    "last item must be string or None");
+		}
+		Py_XDECREF(item);
+	    }
+	}
+    } else if (result != Py_None) {
+	PyErr_SetString(PyExc_TypeError,
+			"plot iterator must return sequence or None");
+    }
+    
+    Py_DECREF(result);
+
+cleanup:
+
+    if (PyErr_Occurred()) {
+	PyErr_Print();
+	PyErr_Clear();
+    }
+    
+    PyGtk_UnblockThreads();
 }
 
 /*

@@ -1,7 +1,16 @@
+New in 0.22:
+* Requires gtk+extra-0.99.17.
+* GtkPlotData.set_gradient() and get_gradient() now get/return the number
+  of sublevels as an additional parameter.
+* GtkPlotData.set_points() accepts the tuple returned by get_points() as
+  input.
+* GtkCheckItem will be removed in the next version.  Please use the
+  standard GtkCheckButton instead.
+
 New in 0.21:
-* The bindings are now a package, ie gtkextra/__init__.py is used
-  instead of gtkextra.py.  Please remove the old files before the
-  the new files are installed.
+* The bindings are now a package, ie. gtkextra/__init__.py is used
+  instead of gtkextra.py.  Please remove the old bindings before
+  installing the new version.
 
 New in 0.20:
 * The bindings are now built and installed with the Python
@@ -22,23 +31,12 @@ New in 0.18:
   is_transparent().
 * Removed GtkPlot.plot_set_flags(), plot_unset_flags() and
   PLOT_TRANSPARENT.  Use GtkPlot.set_transparent() instead.
-* Added GtkPlot.grids_set_on_top() and grids_on_top().
-* Added PLOT_BAR_POINTS, PLOT_BAR_RELATIVE, PLOT_BAR_ABSOLUTE.
-* Added GtkPlotCSurface.set_lines_only(), lines_only(),
-  set_labels_visible() and labels_visible().
-* Added GtkPlotFlux.center() and is_centered().
-* Added GtkPlotText.set_border().
-* Added GtkPlotCanvas.put_pixmap() and PLOT_CANVAS_PIXMAP.
 * GtkFileList.open_dir() now returns a boolean value indicating
   success or failure.
-* Added GtkFileList.get_filetype(), add_type() and add_type_filter().
 * Added GtkIconFileSelection.show_tree().  Note: Use show() instead of
   show_all() to manage a GtkIconFileSelection dialog.  If the dialog
   is managed with show_all() the tree widget, that is now disabled by
   default, will be shown and the GtkExtra code won't work correctly.
-* Added GtkIconList.add_from_pixmap().
-* Added the attributes GtkPSFont.i18n_latinfamily and vertical.
-* Added the function psfont_add_i18n_font().
 * Applied a patch from Joe Van Andel that fixes a Numerical Python
   problem.
 
@@ -68,17 +66,8 @@ New in 0.17:
 * Renamed GtkPlot.axis_labels_set_numbers() to
   axis_set_labels_numbers().
 * Removed GtkPlot.axis_set_tick_labels().  Custom labels are now set
-  with the signal "tick_label". Note: This signal is not supported by
-  the Python bindings since the signal "tick_label" uses
-  GTK_TYPE_POINTER.
-* Added GtkPlot.axis_set_labels_suffix(), axis_set_labels_prefix(),
-  axis_get_labels_suffix() and axis_get_labels_prefix().
+  with the signal "tick_label". This signal is not supported by the
+  Python bindings.
 * Updated GtkPlot3D.corner_set_attributes(), corner_get_attributes(),
   frame_set_attributes(), frame_get_attributes() and
   axis_set_ticks_width().  The width is now a floating point value.
-* Added GtkIconFileSelection.show_hidden() and set_filter().
-* Added GtkIconList.set_mode(), get_mode(), set_editable(),
-  is_editable(), set_row_spacing(), get_row_spacing(),
-  set_col_spacing(), get_col_spacing(), set_text_space(),
-  get_text_space(), set_icon_border(), get_icon_border(),
-  set_icon_width() and get_icon_width().

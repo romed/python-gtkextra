@@ -36,7 +36,7 @@ class Application(GtkWindow):
 
     def build_example1(self, plot):
         px1 = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
-        py1 = [0.2, 0.4, 0.5, 0.35, 0.30, 0.40]
+        py1 = [0.56, 0.12, 0.123, 0.5, 0.2, 0.21]
         pz1 = [0.12, 0.22, 0.27, 0.12, 0.052, 0.42]
         dz1 = [0.0243, 0.045, 0.075, 0.0213, 0.05, 0.0324]
 
@@ -50,7 +50,7 @@ class Application(GtkWindow):
         data.set_z(pz1)
         data.set_dz(dz1)
         data.show_zerrbars()
-        data.set_symbol(PLOT_SYMBOL_NONE, PLOT_SYMBOL_FILLED, 10, 2,
+        data.set_symbol(PLOT_SYMBOL_CIRCLE, PLOT_SYMBOL_FILLED, 10, 2,
                         yellow, red)
         data.set_line_attributes(PLOT_LINE_NONE, 1, red)
         data.set_legend("Boxes")

@@ -36,7 +36,7 @@ libraries.insert(0, "gtkextra")
 sources = glob.glob(os.path.join("gtkextra", "*.c"))
 
 setup (name = "python-gtkextra",
-       version = "0.21",
+       version = "0.22",
        description = "Python bindings for the GtkExtra widget set",
        long_description = "This package contains modules that allow "\
                           "you to use the GtkExtra widget set in "\

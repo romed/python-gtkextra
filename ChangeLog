@@ -1,3 +1,117 @@
+2002-01-03  Andreas Voegele  <voegelas@users.sourceforge.net>
+
+	* gtkextra/__init__.py: Added PLOT_CANVAS_MARKER. Updated
+	PLOT_CANVAS_CUSTOM.
+	
+	Added selections PLOT_CANVAS_SELECT_NONE,
+	PLOT_CANVAS_SELECT_MARKERS, PLOT_CANVAS_SELECT_TARGET.
+	
+	Added selection modes PLOT_CANVAS_SELECT_CLICK_1,
+	PLOT_CANVAS_SELECT_CLICK_2.
+	
+	Added iterator masks PLOT_DATA_X, PLOT_DATA_Y, PLOT_DATA_Z,
+	PLOT_DATA_A, PLOT_DATA_DX, PLOT_DATA_DY, PLOT_DATA_DZ,
+	PLOT_DATA_DA, PLOT_DATA_LABELS.
+	
+	Added GtkPlot.axis_set_labels_offset(), axis_get_labels_offset().
+	
+	Added GtkPlotCanvas.freeze(), thaw().
+	
+	Added GtkPlotData.update(), get_point(), set_a_scale(),
+	get_a_scale(), draw_gradient(), gradient_autoscale_a(),
+	gradient_autoscale_da(), gradient_autoscale_z(), add_marker(),
+	remove_marker(), remove_markers(), show_markers(),
+	markers_visible().
+	
+	Updated GtkPlotData.set_gradient(), get_gradient().
+	
+	Added GtkPlotSurface.use_height_gradient(), set_transparent(),
+	build_mesh() and recalc_nodes().
+	
+	Added GtkSheet.get_entry_widget(), set_background(), set_grid(),
+	show_grid() and grid_visible().
+	
+	Added history_combo to GtkIconFileSelection.
+	
+	* examples/testboxes.py: Updated the array py1 and the arguments
+	of set_symbol().
+	
+	* examples/testcontour.py: Added an additional argument to
+	set_gradient().  Added surface.set_lines_visible(FALSE).
+	
+	* examples/testgtkplot.py: Added move_item().
+	
+	* examples/testgtksheet.py: Added self.set_background(),
+	self.set_grid() and self.show_grid().
+	
+	* gtkextra/gtkextra.defs: Added gtk_plot_set_pc(),
+	gtk_plot_axis_set_labels_offset(),
+	gtk_plot_axis_get_labels_offset().
+	
+	Added gtk_plot_canvas_set_pc(), gtk_plot_canvas_freeze(),
+	gtk_plot_canvas_thaw().  Updated gtk_plot_canvas_grid_set_step().
+	
+	Added gtk_plot_data_new_iterator(), gtk_plot_data_update(),
+	gtk_plot_data_get_point(), gtk_plot_data_set_a_scale(),
+	gtk_plot_data_get_a_scale(), gtk_plot_data_draw_gradient(),
+	gtk_plot_data_gradient_autoscale_a(),
+	gtk_plot_data_gradient_autoscale_da(),
+	gtk_plot_data_gradient_autoscale_z(), gtk_plot_data_add_marker(),
+	gtk_plot_data_remove_marker(), gtk_plot_data_remove_markers(),
+	gtk_plot_data_show_markers(), gtk_plot_data_markers_visible().
+	
+	Updated gtk_plot_data_set_gradient(),
+	gtk_plot_data_get_gradient().
+	
+	Added gtk_plot_surface_use_height_gradient(),
+	gtk_plot_surface_set_transparent(), gtk_plot_surface_build_mesh()
+	and gtk_plot_surface_recalc_nodes().
+
+	Added gtk_sheet_get_entry_widget(), gtk_sheet_set_background(),
+	gtk_sheet_set_grid(), gtk_sheet_show_grid() and
+	gtk_sheet_grid_visible().
+	
+	Added history_combo to IconFileSelection.
+
+	Replaced "int" and "uint" with the correct types.
+	
+	* gtkextra/gtkextra-extrafuncs.defs: Added GTK_PLOT_CANVAS_MARKER.
+	Added PlotCanvasSelection.  Added PlotCanvasSelectionMode.  Added
+	GTK_PLOT_DATA_X etc.  Replaced "int" with "GtkJustification".
+
+	* gtkextra/pygtkextra-private.h: Added
+	pygtkextra_plot_data_register_plot_iterator() and
+	pygtkextra_plot_data_call_plot_iterator().
+	
+	* gtkextra/gtkplotdata-support.c: Added
+	pygtkextra_plot_data_register_plot_iterator() and
+	pygtkextra_plot_data_call_plot_iterator().
+	
+	* gtkextra/gtkplotcanvaschild-type.c: Added
+	GtkPlotCanvasChild.set_selection(), set_selection_mode().
+
+	* gtkextra/gtkextramodule.c: Added gtk_plot_data_get_point(),
+	gtk_plot_data_add_marker(), gtk_plot_data_remove_marker().
+	Updated gtk_plot_data_get_gradient(), gtk_plot_data_set_points(),
+	gtk_plot_surface_set_points() gtk_sheet_get_entry_widget().
+	
+	* gtkextra/gtkextra.override: Added gtk_plot_set_pc(),
+	gtk_plot_canvas_set_pc() to the list of ignored functions.  Added
+	gtk_plot_data_get_point(), gtk_plot_data_add_marker(),
+	gtk_plot_data_remove_marker().  Updated
+	gtk_plot_data_get_gradient(), gtk_plot_data_set_points(),
+	gtk_plot_surface_set_points().
+	
+	* codegen/mkgtkextra.py: Added gtk_plot_set_pc(),
+	gtk_plot_canvas_set_pc(), gtk_plot_data_new_iterator().
+	Added several types that are mapped to "int" or "uint".
+	
+	* setup.py: Updated the version number.
+	
+	* NEWS: Added a new entry.  Modified several old entries.
+
+	* INSTALL: Minor changes.
+
 2001-09-15  Andreas Voegele  <voegelas@users.sourceforge.net>
 
 	* MANIFEST.in: Moved the source files into a sub directory.

@@ -25,7 +25,10 @@ class Example1(GtkSheet):
         GtkSheet.__init__(self, 1000, 26, "Example 1")
         
         colormap = self.get_colormap()
-    
+
+        self.set_background(colormap.alloc("light yellow"))
+        self.set_grid(colormap.alloc("light blue"))
+        
         for column in xrange(self.get_columns_count()):
             name = chr(ord("A") + column)
             self.column_button_add_label(column, name)
@@ -250,6 +253,8 @@ class Example3(GtkSheet):
 
     def __init__(self):
         GtkSheet.__init__(self, 1000, 26, "Example 3")
+
+        self.show_grid(FALSE)
 
         colormap = self.get_colormap()
 

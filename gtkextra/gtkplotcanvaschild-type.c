@@ -34,11 +34,48 @@ PyGtkPlotCanvasChild_Dealloc(PyGtkPlotCanvasChild_Object *self)
     PyMem_DEL(self);
 }
 
+static PyObject *
+PyGtkPlotCanvasChild_set_selection(PyGtkPlotCanvasChild_Object *self,
+				   PyObject *args)
+{
+    int selection;
+    
+    if (!PyArg_ParseTuple(args, "i:GtkPlotCanvasChild.set_selection",
+			  &selection))
+	return NULL;
+    gtk_plot_canvas_child_set_selection(self->child, selection);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
+PyGtkPlotCanvasChild_set_selection_mode(PyGtkPlotCanvasChild_Object *self,
+					PyObject *args)
+{
+    int mode;
+    
+    if (!PyArg_ParseTuple(args, "i:GtkPlotCanvasChild.set_selection_mode",
+			  &mode))
+	return NULL;
+    gtk_plot_canvas_child_set_selection_mode(self->child, mode);
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyMethodDef PyGtkPlotCanvasChild_methods[] =
+{
+    { "set_selection", (PyCFunction) PyGtkPlotCanvasChild_set_selection, METH_VARARGS },
+    { "set_selection_mode", (PyCFunction) PyGtkPlotCanvasChild_set_selection_mode, METH_VARARGS },
+    { NULL, NULL, 0 }
+};
+
 static struct memberlist PyGtkPlotCanvasChild_members[] =
 {
     { "allocation", -1, 0, RO },
     { "type", T_INT, offsetof(GtkPlotCanvasChild, type), RO },
     { "flags",T_INT, offsetof(GtkPlotCanvasChild, flags), 0 },
+    { "selection",T_INT, offsetof(GtkPlotCanvasChild, selection), 0 },
+    { "mode",T_INT, offsetof(GtkPlotCanvasChild, mode), 0 },
     { "state", T_UINT, offsetof(GtkPlotCanvasChild, state), RO },
     { "data", -1, 0, RO },
     { NULL }
@@ -47,6 +84,8 @@ static struct memberlist PyGtkPlotCanvasChild_members[] =
 static PyObject *
 PyGtkPlotCanvasChild_GetAttr(PyGtkPlotCanvasChild_Object *self, char *attr)
 {
+    PyObject *value;
+
     if (strcmp(attr, "allocation") == 0) {
 	return Py_BuildValue("(iiii)",
 			     (int) self->child->allocation.x,
@@ -69,8 +108,16 @@ PyGtkPlotCanvasChild_GetAttr(PyGtkPlotCanvasChild_Object *self, char *attr)
 	    return PyCObject_FromVoidPtr(self->child->data, NULL);
 	}
     }
-    return PyMember_Get((char *) self->child, PyGtkPlotCanvasChild_members,
-			attr);
+    value = PyMember_Get((char *) self->child, PyGtkPlotCanvasChild_members,
+			 attr);
+    if (!value) {
+	if (PyErr_ExceptionMatches(PyExc_AttributeError)) {
+	    PyErr_Clear();
+	    value = Py_FindMethod(PyGtkPlotCanvasChild_methods,
+				  (PyObject *) self, attr);
+	}
+    }
+    return value;
 }
 
 static int

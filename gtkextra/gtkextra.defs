@@ -129,6 +129,7 @@
     '("GtkWidget*" "path_label")
     '("GtkWidget*" "dir_tree")
     '("GtkWidget*" "file_list")
+    '("GtkWidget*" "history_combo")
     '("GtkWidget*" "file_entry")
     '("GtkWidget*" "filter_entry")
     '("GtkWidget*" "ok_button")
@@ -245,7 +246,7 @@
     '("guint" "rows")
     '("guint" "columns")
     '("const-gchar*" "title" (null-ok))
-    '("uint" "entry_type")
+    '("GtkType" "entry_type")
   )
 )
 
@@ -272,13 +273,20 @@
   (c-name "gtk_sheet_change_entry")
   (return-type "none")
   (parameters
-    '("uint" "entry_type")
+    '("GtkType" "entry_type")
   )
 )
 
 (define-method get_entry
   (of-object "GtkSheet")
   (c-name "gtk_sheet_get_entry")
+  (return-type "GtkWidget*")
+  (can-return-null #t)
+)
+
+(define-method get_entry_widget
+  (of-object "GtkSheet")
+  (c-name "gtk_sheet_get_entry_widget")
   (return-type "GtkWidget*")
   (can-return-null #t)
 )
@@ -340,6 +348,39 @@
   (return-type "none")
 )
 
+(define-method set_background
+  (of-object "GtkSheet")
+  (c-name "gtk_sheet_set_background")
+  (return-type "none")
+  (parameters
+    '("GdkColor*" "color")
+  )
+)
+
+(define-method set_grid
+  (of-object "GtkSheet")
+  (c-name "gtk_sheet_set_grid")
+  (return-type "none")
+  (parameters
+    '("GdkColor*" "color")
+  )
+)
+
+(define-method show_grid
+  (of-object "GtkSheet")
+  (c-name "gtk_sheet_show_grid")
+  (return-type "none")
+  (parameters
+    '("gboolean" "visible")
+  )
+)
+
+(define-method grid_visible
+  (of-object "GtkSheet")
+  (c-name "gtk_sheet_grid_visible")
+  (return-type "gboolean")
+)
+
 (define-method set_column_title
   (of-object "GtkSheet")
   (c-name "gtk_sheet_set_column_title")
@@ -386,7 +427,7 @@
   (return-type "none")
   (parameters
     '("gint" "row")
-    '("int" "justification")
+    '("GtkJustification" "justification")
   )
 )
 
@@ -396,7 +437,7 @@
   (return-type "none")
   (parameters
     '("gint" "column")
-    '("int" "justification")
+    '("GtkJustification" "justification")
   )
 )
 
@@ -639,7 +680,7 @@
   (parameters
     '("gint" "row")
     '("gint" "column")
-    '("int" "justification")
+    '("GtkJustification" "justification")
     '("const-gchar*" "string" (null-ok))
   )
 )
@@ -708,7 +749,7 @@
 (define-method cell_get_state
   (of-object "GtkSheet")
   (c-name "gtk_sheet_cell_get_state")
-  (return-type "int")
+  (return-type "GtkStateType")
   (parameters
     '("gint" "row")
     '("gint" "column")
@@ -874,7 +915,7 @@
   (return-type "none")
   (parameters
     '("const-GtkSheetRange*" "range" (null-ok))
-    '("int" "justification")
+    '("GtkJustification" "justification")
   )
 )
 
@@ -884,7 +925,7 @@
   (return-type "none")
   (parameters
     '("gint" "column")
-    '("int" "justification")
+    '("GtkJustification" "justification")
   )
 )
 
@@ -1029,9 +1070,26 @@
   )
 )
 
+(define-function gtk_plot_data_new_iterator
+  (c-name "gtk_plot_data_new_iterator")
+  (is-constructor-of "GtkPlotData")
+  (return-type "GtkWidget*")
+  (parameters
+    '("GtkPlotIterator" "iterator")
+    '("gint" "n")
+    '("guint16" "mask")
+  )
+)
+
 (define-method paint
   (of-object "GtkPlotData")
   (c-name "gtk_plot_data_paint")
+  (return-type "none")
+)
+
+(define-method update
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_update")
   (return-type "none")
 )
 
@@ -1077,6 +1135,25 @@
     '("gdouble**" "out_dx")
     '("gdouble**" "out_dy")
     '("gint*" "out_n")
+  )
+)
+
+(define-method get_point
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_get_point")
+  (return-type "none")
+  (parameters
+   '("gint" "i")
+   '("gdouble*" "out_x")
+   '("gdouble*" "out_y")
+   '("gdouble*" "out_z")
+   '("gdouble*" "out_a")
+   '("gdouble*" "out_dx")
+   '("gdouble*" "out_dy")
+   '("gdouble*" "out_dz")
+   '("gdouble*" "out_da")
+   '("gchar**" "out_label")
+   '("gboolean*" "out_error")
   )
 )
 
@@ -1149,6 +1226,15 @@
   (return-type "none")
   (parameters
     '("gdouble*" "da")
+  )
+)
+
+(define-method set_a_scale
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_set_a_scale")
+  (return-type "none")
+  (parameters
+    '("gdouble" "scale")
   )
 )
 
@@ -1241,6 +1327,12 @@
   )
 )
 
+(define-method get_a_scale
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_get_a_scale")
+  (return-type "gdouble")
+)
+
 (define-method get_labels
   (of-object "GtkPlotData")
   (c-name "gtk_plot_data_get_labels")
@@ -1294,8 +1386,8 @@
   (c-name "gtk_plot_data_set_symbol")
   (return-type "none")
   (parameters
-    '("int" "symbol_type")
-    '("int" "symbol_style")
+    '("GtkPlotSymbolType" "symbol_type")
+    '("GtkPlotSymbolStyle" "symbol_style")
     '("gint" "size")
     '("gfloat" "line_width")
     '("const-GdkColor*" "color")
@@ -1308,8 +1400,8 @@
   (c-name "gtk_plot_data_get_symbol")
   (return-type "none")
   (parameters
-    '("int*" "out_symbol_type")
-    '("int*" "out_symbol_style")
+    '("GtkPlotSymbolType*" "out_symbol_type")
+    '("GtkPlotSymbolStyle*" "out_symbol_style")
     '("gint*" "out_size")
     '("gfloat*" "out_line_width")
     '("GdkColor*" "out_color")
@@ -1322,7 +1414,7 @@
   (c-name "gtk_plot_data_set_connector")
   (return-type "none")
   (parameters
-    '("int" "connector")
+    '("GtkPlotConnector" "connector")
   )
 )
 
@@ -1337,7 +1429,7 @@
   (c-name "gtk_plot_data_set_line_attributes")
   (return-type "none")
   (parameters
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
 )
@@ -1348,7 +1440,7 @@
   (c-name "gtk_plot_data_get_line_attributes")
   (return-type "none")
   (parameters
-    '("int*" "out_line_style")
+    '("GtkPlotLineStyle*" "out_line_style")
     '("gfloat*" "out_width")
     '("GdkColor*" "out_color")
   )
@@ -1359,7 +1451,7 @@
   (c-name "gtk_plot_data_set_x_attributes")
   (return-type "none")
   (parameters
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
   )
@@ -1370,7 +1462,7 @@
   (c-name "gtk_plot_data_set_y_attributes")
   (return-type "none")
   (parameters
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
   )
@@ -1381,7 +1473,7 @@
   (c-name "gtk_plot_data_set_z_attributes")
   (return-type "none")
   (parameters
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
   )
@@ -1527,6 +1619,34 @@
   (return-type "gboolean")
 )
 
+(define-method draw_gradient
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_draw_gradient")
+  (return-type "none")
+  (parameters
+    '("gint" "x")
+    '("gint" "y")
+  )
+)
+
+(define-method gradient_autoscale_a
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_gradient_autoscale_a")
+  (return-type "none")
+)
+
+(define-method gradient_autoscale_da
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_gradient_autoscale_da")
+  (return-type "none")
+)
+
+(define-method gradient_autoscale_z
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_gradient_autoscale_z")
+  (return-type "none")
+)
+
 (define-method set_gradient_colors
   (of-object "GtkPlotData")
   (c-name "gtk_plot_data_set_gradient_colors")
@@ -1555,6 +1675,7 @@
     '("gdouble" "min")
     '("gdouble" "max")
     '("gint" "levels")
+    '("gint" "sublevels" (default "0"))
   )
 )
 
@@ -1566,6 +1687,7 @@
     '("gdouble*" "out_min")
     '("gdouble*" "out_max")
     '("gint*" "out_levels")
+    '("gint*" "out_sublevels")
   )
 )
 
@@ -1601,6 +1723,45 @@
   (return-type "none")
 )
 
+(define-method add_marker
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_add_marker")
+  (return-type "GtkPlotMarker*")
+  (parameters
+    '("guint" "i")
+  )
+)
+
+(define-method remove_marker
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_remove_marker")
+  (return-type "gboolean")
+  (parameters
+    '("GtkPlotMarker*" "marker")
+  )
+)
+
+(define-method remove_markers
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_remove_markers")
+  (return-type "none")
+)
+
+(define-method show_markers
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_show_markers")
+  (return-type "none")
+  (parameters
+    '("gboolean" "visible")
+  )
+)
+
+(define-method markers_visible
+  (of-object "GtkPlotData")
+  (c-name "gtk_plot_data_markers_visible")
+  (return-type "gboolean")
+)
+
 
 
 ;; From /usr/include/gtkextra/gtkplotbar.h
@@ -1610,7 +1771,7 @@
   (is-constructor-of "GtkPlotBar")
   (return-type "GtkWidget*")
   (parameters
-    '("int" "orientation" (default "GTK_ORIENTATION_VERTICAL"))
+    '("GtkOrientation" "orientation" (default "GTK_ORIENTATION_VERTICAL"))
   )
 )
 
@@ -1638,7 +1799,7 @@
   (is-constructor-of "GtkPlotBox")
   (return-type "GtkWidget*")
   (parameters
-    '("int" "orientation" (default "GTK_ORIENTATION_VERTICAL"))
+    '("GtkOrientation" "orientation" (default "GTK_ORIENTATION_VERTICAL"))
   )
 )
 
@@ -1659,7 +1820,7 @@
   (parameters
     '("gint" "arrow_length")
     '("gint" "arrow_width")
-    '("int" "symbol_style")
+    '("GtkPlotSymbolStyle" "symbol_style")
   )
 )
 
@@ -1670,7 +1831,7 @@
   (parameters
     '("gint*" "out_arrow_length")
     '("gint*" "out_arrow_width")
-    '("int*" "out_symbol_style")
+    '("GtkPlotSymbolStyle*" "out_symbol_style")
   )
 )
 
@@ -1776,6 +1937,24 @@
   (return-type "none")
   (parameters
     '("gdouble" "ambient")
+  )
+)
+
+(define-method use_height_gradient
+  (of-object "GtkPlotSurface")
+  (c-name "gtk_plot_surface_use_height_gradient")
+  (return-type "none")
+  (parameters
+    '("gboolean" "use_gradient")
+  )
+)
+
+(define-method set_transparent
+  (of-object "GtkPlotSurface")
+  (c-name "gtk_plot_surface_set_transparent")
+  (return-type "none")
+  (parameters
+    '("gboolean" "transparent")
   )
 )
 
@@ -1977,6 +2156,18 @@
   (return-type "gdouble")
 )
 
+(define-method build_mesh
+  (of-object "GtkPlotSurface")
+  (c-name "gtk_plot_surface_build_mesh")
+  (return-type "none")
+)
+
+(define-method recalc_nodes
+  (of-object "GtkPlotSurface")
+  (c-name "gtk_plot_surface_recalc_nodes")
+  (return-type "none")
+)
+
 
 
 ;; From /usr/include/gtkextra/gtkplotcsurface.h
@@ -2107,6 +2298,15 @@
   (c-name "gtk_plot_get_drawable")
   (return-type "GdkDrawable*")
   (can-return-null #t)
+)
+
+(define-method set_pc
+  (of-object "GtkPlot")
+  (c-name "gtk_plot_set_pc")
+  (return-type "none")
+  (parameters
+    '("GtkPlotPC*" "pc")
+  )
 )
 
 (define-method set_background_pixmap
@@ -2320,7 +2520,7 @@
   (c-name "gtk_plot_set_xscale")
   (return-type "none")
   (parameters
-    '("int" "scale_type")
+    '("GtkPlotScale" "scale_type")
   )
 )
 
@@ -2329,20 +2529,20 @@
   (c-name "gtk_plot_set_yscale")
   (return-type "none")
   (parameters
-    '("int" "scale_type")
+    '("GtkPlotScale" "scale_type")
   )
 )
 
 (define-method get_xscale
   (of-object "GtkPlot")
   (c-name "gtk_plot_get_xscale")
-  (return-type "int")
+  (return-type "GtkPlotScale")
 )
 
 (define-method get_yscale
   (of-object "GtkPlot")
   (c-name "gtk_plot_get_yscale")
-  (return-type "int")
+  (return-type "GtkPlotScale")
 )
 
 (define-method put_text
@@ -2358,7 +2558,7 @@
     '("const-GdkColor*" "foreground" (null-ok))
     '("const-GdkColor*" "background" (null-ok))
     '("gboolean" "transparent")
-    '("int" "justification")
+    '("GtkJustification" "justification")
     '("const-gchar*" "string" (null-ok))
   )
 )
@@ -2400,7 +2600,7 @@
   (return-type "GtkPlotAxis*")
   (can-return-null #t)
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
   )
 )
 
@@ -2409,7 +2609,7 @@
   (c-name "gtk_plot_axis_set_visible")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("gboolean" "visible")
   )
 )
@@ -2419,7 +2619,7 @@
   (c-name "gtk_plot_axis_visible")
   (return-type "gboolean")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
   )
 )
 
@@ -2428,7 +2628,7 @@
   (c-name "gtk_plot_axis_set_title")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("const-gchar*" "title" (null-ok))
   )
 )
@@ -2438,7 +2638,7 @@
   (c-name "gtk_plot_axis_show_title")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
   )
 )
 
@@ -2447,7 +2647,7 @@
   (c-name "gtk_plot_axis_hide_title")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
   )
 )
 
@@ -2456,7 +2656,7 @@
   (c-name "gtk_plot_axis_move_title")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("gint" "angle")
     '("gdouble" "x")
     '("gdouble" "y")
@@ -2468,8 +2668,8 @@
   (c-name "gtk_plot_axis_justify_title")
   (return-type "none")
   (parameters
-    '("int" "axis")
-    '("int" "justification")
+    '("GtkPlotAxisPos" "axis")
+    '("GtkJustification" "justification")
   )
 )
 
@@ -2478,7 +2678,7 @@
   (c-name "gtk_plot_axis_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
   )
@@ -2489,7 +2689,7 @@
   (c-name "gtk_plot_axis_get_attributes")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("gfloat*" "out_width")
     '("GdkColor*" "out_color")
   )
@@ -2500,7 +2700,7 @@
   (c-name "gtk_plot_axis_set_ticks")
   (return-type "none")
   (parameters
-    '("int" "orientation")
+    '("GtkPlotOrientation" "orientation")
     '("gdouble" "major_step")
     '("gint" "num_minor")
   )
@@ -2511,7 +2711,7 @@
   (c-name "gtk_plot_axis_set_major_ticks")
   (return-type "none")
   (parameters
-    '("int" "orientation")
+    '("GtkPlotOrientation" "orientation")
     '("gdouble" "major_step")
   )
 )
@@ -2521,7 +2721,7 @@
   (c-name "gtk_plot_axis_set_minor_ticks")
   (return-type "none")
   (parameters
-    '("int" "orientation")
+    '("GtkPlotOrientation" "orientation")
     '("gint" "num_minor")
   )
 )
@@ -2531,7 +2731,7 @@
   (c-name "gtk_plot_axis_set_ticks_length")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("gint" "length")
   )
 )
@@ -2541,7 +2741,7 @@
   (c-name "gtk_plot_axis_set_ticks_width")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("gfloat" "width")
   )
 )
@@ -2551,7 +2751,7 @@
   (c-name "gtk_plot_axis_show_ticks")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("gint" "major_mask")
     '("gint" "minor_mask")
   )
@@ -2562,7 +2762,7 @@
   (c-name "gtk_plot_axis_set_ticks_limits")
   (return-type "none")
   (parameters
-    '("int" "orientation")
+    '("GtkPlotOrientation" "orientation")
     '("gdouble" "begin")
     '("gdouble" "end")
   )
@@ -2573,7 +2773,7 @@
   (c-name "gtk_plot_axis_unset_ticks_limits")
   (return-type "none")
   (parameters
-    '("int" "orientation")
+    '("GtkPlotOrientation" "orientation")
   )
 )
 
@@ -2582,7 +2782,7 @@
   (c-name "gtk_plot_axis_show_labels")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("gint" "labels_mask")
   )
 )
@@ -2592,14 +2792,14 @@
   (c-name "gtk_plot_axis_title_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("const-gchar*" "fontname" (null-ok))
     '("gint" "height")
     '("gint" "angle")
     '("const-GdkColor*" "foreground" (null-ok))
     '("const-GdkColor*" "background" (null-ok))
     '("gboolean" "transparent")
-    '("int" "justification")
+    '("GtkJustification" "justification")
   )
 )
 
@@ -2608,14 +2808,14 @@
   (c-name "gtk_plot_axis_set_labels_attributes")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("const-gchar*" "fontname" (null-ok))
     '("gint" "height")
     '("gint" "angle")
     '("const-GdkColor*" "foreground" (null-ok))
     '("const-GdkColor*" "background" (null-ok))
     '("gboolean" "transparent")
-    '("int" "justification")
+    '("GtkJustification" "justification")
   )
 )
 
@@ -2624,9 +2824,28 @@
   (c-name "gtk_plot_axis_set_labels_numbers")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("gint" "style")
     '("gint" "precision")
+  )
+)
+
+(define-method axis_set_labels_offset
+  (of-object "GtkPlot")
+  (c-name "gtk_plot_axis_set_labels_offset")
+  (return-type "none")
+  (parameters
+    '("GtkPlotAxisPos" "axis")
+    '("gint" "offset")
+  )
+)
+
+(define-method axis_get_labels_offset
+  (of-object "GtkPlot")
+  (c-name "gtk_plot_axis_get_labels_offset")
+  (return-type "gint")
+  (parameters
+    '("GtkPlotAxisPos" "axis")
   )
 )
 
@@ -2635,7 +2854,7 @@
   (c-name "gtk_plot_axis_use_custom_tick_labels")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("gboolean" "use")
   )
 )
@@ -2645,7 +2864,7 @@
   (c-name "gtk_plot_axis_set_labels_suffix")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("const-gchar*" "string")
   )
 )
@@ -2655,7 +2874,7 @@
   (c-name "gtk_plot_axis_set_labels_prefix")
   (return-type "none")
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
     '("const-gchar*" "string")
   )
 )
@@ -2667,7 +2886,7 @@
   (caller-owns-return #f)
   (can-return-null #t)
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
   )
 )
 
@@ -2678,7 +2897,7 @@
   (caller-owns-return #f)
   (can-return-null #t)
   (parameters
-    '("int" "axis")
+    '("GtkPlotAxisPos" "axis")
   )
 )
 
@@ -2756,7 +2975,7 @@
   (c-name "gtk_plot_y0line_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
   )
@@ -2767,7 +2986,7 @@
   (c-name "gtk_plot_x0line_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "style")
+    '("GtkPlotLineStyle" "style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
   )
@@ -2778,7 +2997,7 @@
   (c-name "gtk_plot_major_vgrid_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "style")
+    '("GtkPlotLineStyle" "style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
   )
@@ -2789,9 +3008,9 @@
   (c-name "gtk_plot_minor_vgrid_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "style")
+    '("GtkPlotLineStyle" "style")
     '("gfloat" "width")
-    '("GdkColor*" "color")
+    '("const-GdkColor*" "color")
   )
 )
 
@@ -2800,9 +3019,9 @@
   (c-name "gtk_plot_major_hgrid_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "style")
+    '("GtkPlotLineStyle" "style")
     '("gfloat" "width")
-    '("GdkColor*" "color")
+    '("const-GdkColor*" "color")
   )
 )
 
@@ -2811,9 +3030,9 @@
   (c-name "gtk_plot_minor_hgrid_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "style")
+    '("GtkPlotLineStyle" "style")
     '("gfloat" "width")
-    '("GdkColor*" "color")
+    '("const-GdkColor*" "color")
   )
 )
 
@@ -2834,7 +3053,7 @@
   (c-name "gtk_plot_set_legends_border")
   (return-type "none")
   (parameters
-    '("int" "border")
+    '("GtkPlotBorderStyle" "border")
     '("gint" "shadow_width" (= "0"))
   )
 )
@@ -3126,7 +3345,7 @@
   (c-name "gtk_plot3d_plane_set_color")
   (return-type "none")
   (parameters
-    '("int" "plane")
+    '("GtkPlotPlane" "plane")
     '("const-GdkColor*" "color")
   )
 )
@@ -3136,7 +3355,7 @@
   (c-name "gtk_plot3d_plane_set_visible")
   (return-type "none")
   (parameters
-    '("int" "plane")
+    '("GtkPlotPlane" "plane")
     '("gboolean" "visible")
   )
 )
@@ -3146,7 +3365,7 @@
   (c-name "gtk_plot3d_plane_visible")
   (return-type "gboolean")
   (parameters
-    '("int" "plane")
+    '("GtkPlotPlane" "plane")
   )
 )
 
@@ -3170,7 +3389,7 @@
   (c-name "gtk_plot3d_corner_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
   )
@@ -3181,7 +3400,7 @@
   (c-name "gtk_plot3d_corner_get_attributes")
   (return-type "none")
   (parameters
-    '("int*" "out_line_style")
+    '("GtkPlotLineStyle*" "out_line_style")
     '("gfloat*" "out_width")
     '("GdkColor*" "out_color")
   )
@@ -3192,7 +3411,7 @@
   (c-name "gtk_plot3d_frame_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
   )
@@ -3203,7 +3422,7 @@
   (c-name "gtk_plot3d_frame_get_attributes")
   (return-type "none")
   (parameters
-    '("int*" "out_line_style")
+    '("GtkPlotLineStyle*" "out_line_style")
     '("gfloat*" "out_width")
     '("GdkColor*" "out_color")
   )
@@ -3215,7 +3434,7 @@
   (return-type "GtkPlotAxis*")
   (can-return-null #t)
   (parameters
-    '("int" "orientation")
+    '("GtkPlotOrientation" "orientation")
   )
 )
 
@@ -3225,7 +3444,7 @@
   (return-type "GtkPlotAxis*")
   (can-return-null #t)
   (parameters
-    '("int" "side")
+    '("GtkPlotSide" "side")
   )
 )
 
@@ -3234,7 +3453,7 @@
   (c-name "gtk_plot3d_axis_show_major_ticks")
   (return-type "none")
   (parameters
-    '("int" "side")
+    '("GtkPlotSide" "side")
     '("gint" "ticks_mask")
   )
 )
@@ -3244,7 +3463,7 @@
   (c-name "gtk_plot3d_axis_show_minor_ticks")
   (return-type "none")
   (parameters
-    '("int" "side")
+    '("GtkPlotSide" "side")
     '("gint" "ticks_mask")
   )
 )
@@ -3254,7 +3473,7 @@
   (c-name "gtk_plot3d_axis_show_labels")
   (return-type "none")
   (parameters
-    '("int" "side")
+    '("GtkPlotSide" "side")
     '("gint" "label_mask")
   )
 )
@@ -3264,7 +3483,7 @@
   (c-name "gtk_plot3d_axis_show_title")
   (return-type "none")
   (parameters
-    '("int" "side")
+    '("GtkPlotSide" "side")
   )
 )
 
@@ -3273,7 +3492,7 @@
   (c-name "gtk_plot3d_axis_hide_title")
   (return-type "none")
   (parameters
-    '("int" "side")
+    '("GtkPlotSide" "side")
   )
 )
 
@@ -3282,7 +3501,7 @@
   (c-name "gtk_plot3d_axis_set_ticks")
   (return-type "none")
   (parameters
-    '("int" "orientation")
+    '("GtkPlotOrientation" "orientation")
     '("gdouble" "major_step")
     '("gint" "num_minor")
   )
@@ -3293,7 +3512,7 @@
   (c-name "gtk_plot3d_axis_set_major_ticks")
   (return-type "none")
   (parameters
-    '("int" "orientation")
+    '("GtkPlotOrientation" "orientation")
     '("gdouble" "major_step")
   )
 )
@@ -3303,7 +3522,7 @@
   (c-name "gtk_plot3d_axis_set_minor_ticks")
   (return-type "none")
   (parameters
-    '("int" "orientation")
+    '("GtkPlotOrientation" "orientation")
     '("gint" "num_minor")
   )
 )
@@ -3313,7 +3532,7 @@
   (c-name "gtk_plot3d_axis_set_ticks_length")
   (return-type "none")
   (parameters
-    '("int" "orientation")
+    '("GtkPlotOrientation" "orientation")
     '("gint" "length")
   )
 )
@@ -3323,7 +3542,7 @@
   (c-name "gtk_plot3d_axis_set_ticks_width")
   (return-type "none")
   (parameters
-    '("int" "orientation")
+    '("GtkPlotOrientation" "orientation")
     '("gfloat" "width")
   )
 )
@@ -3333,7 +3552,7 @@
   (c-name "gtk_plot3d_axis_show_ticks")
   (return-type "none")
   (parameters
-    '("int" "side")
+    '("GtkPlotSide" "side")
     '("gint" "major_mask")
     '("gint" "minor_mask")
   )
@@ -3403,7 +3622,7 @@
   (c-name "gtk_plot3d_major_zgrid_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
   )
@@ -3414,7 +3633,7 @@
   (c-name "gtk_plot3d_major_zgrid_get_attributes")
   (return-type "none")
   (parameters
-    '("int*" "out_line_style")
+    '("GtkPlotLineStyle*" "out_line_style")
     '("gfloat*" "out_width")
     '("GdkColor*" "out_color")
   )
@@ -3425,7 +3644,7 @@
   (c-name "gtk_plot3d_minor_zgrid_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
   )
@@ -3436,7 +3655,7 @@
   (c-name "gtk_plot3d_minor_zgrid_get_attributes")
   (return-type "none")
   (parameters
-    '("int*" "out_line_style")
+    '("GtkPlotLineStyle*" "out_line_style")
     '("gfloat*" "out_width")
     '("GdkColor*" "out_color")
   )
@@ -3457,6 +3676,15 @@
   )
 )
 
+(define-method set_pc
+  (of-object "GtkPlotCanvas")
+  (c-name "gtk_plot_canvas_set_pc")
+  (return-type "none")
+  (parameters
+    '("GtkPlotPC*" "pc")
+  )
+)
+
 (define-method paint
   (of-object "GtkPlotCanvas")
   (c-name "gtk_plot_canvas_paint")
@@ -3466,6 +3694,18 @@
 (define-method refresh
   (of-object "GtkPlotCanvas")
   (c-name "gtk_plot_canvas_refresh")
+  (return-type "none")
+)
+
+(define-method freeze
+  (of-object "GtkPlotCanvas")
+  (c-name "gtk_plot_canvas_freeze")
+  (return-type "none")
+)
+
+(define-method thaw
+  (of-object "GtkPlotCanvas")
+  (c-name "gtk_plot_canvas_thaw")
   (return-type "none")
 )
 
@@ -3483,7 +3723,7 @@
   (c-name "gtk_plot_canvas_grid_set_step")
   (return-type "none")
   (parameters
-    '("gint" "step")
+    '("gdouble" "step")
   )
 )
 
@@ -3492,7 +3732,7 @@
   (c-name "gtk_plot_canvas_grid_set_attributes")
   (return-type "none")
   (parameters
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gint" "width")
     '("const-GdkColor*" "color" (null-ok))
   )
@@ -3626,7 +3866,7 @@
     '("const-GdkColor*" "foreground" (null-ok))
     '("const-GdkColor*" "background" (null-ok))
     '("gboolean" "transparent")
-    '("int" "justification")
+    '("GtkJustification" "justification")
     '("const-gchar*" "string" (null-ok))
   )
 )
@@ -3640,10 +3880,10 @@
     '("gdouble" "y1")
     '("gdouble" "x2")
     '("gdouble" "y2")
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "color")
-    '("int" "arrow_mask")
+    '("GtkPlotCanvasArrow" "arrow_mask")
   )
 )
 
@@ -3656,11 +3896,11 @@
     '("gdouble" "y1")
     '("gdouble" "x2")
     '("gdouble" "y2")
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "foreground" (null-ok))
     '("const-GdkColor*" "background" (null-ok))
-    '("int" "border_style")
+    '("GtkPlotBorderStyle" "border_style")
     '("gboolean" "fill")
   )
 )
@@ -3674,7 +3914,7 @@
     '("gdouble" "y1")
     '("gdouble" "x2")
     '("gdouble" "y2")
-    '("int" "line_style")
+    '("GtkPlotLineStyle" "line_style")
     '("gfloat" "width")
     '("const-GdkColor*" "foreground" (null-ok))
     '("const-GdkColor*" "background" (null-ok))
@@ -4209,7 +4449,7 @@
   (return-type "none")
   (parameters
     '("const-gchar*" "string")
-    '("int" "justification")
+    '("GtkJustification" "justification")
   )
 )
 
@@ -4218,7 +4458,7 @@
   (c-name "gtk_item_entry_set_justification")
   (return-type "none")
   (parameters
-    '("int" "justification")
+    '("GtkJustification" "justification")
   )
 )
 

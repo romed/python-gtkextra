@@ -62,6 +62,7 @@ class Application(GtkWindow):
         plot.legends_move(0.58, 0.05)
         canvas.add_plot(plot, 0.15, 0.4)
         self.build_example2(plot)
+        canvas.connect("move_item", self.move_item)
         canvas.connect("select_item", self.select_item)
 
         canvas.put_text(0.40, 0.02, "Times-BoldItalic", 16, 0, None, None,
@@ -84,6 +85,18 @@ class Application(GtkWindow):
         except:
             pass
 
+    def move_item(self, canvas, item, new_x, new_y, *args):
+        if item.type == PLOT_CANVAS_DATA:
+            print "MOVING DATA"
+            (i, old_x, old_y) = canvas.get_active_point()
+            print "Active point: %d -> %f %f" % (i, new_x, new_y)
+            data = canvas.get_active_data()
+            points = data.get_points()
+            points[0][i] = new_x
+            points[1][i] = new_y
+            data.set_points(points)
+        return TRUE
+
     def select_item(self, canvas, event, item, *args):
         if item.type == PLOT_CANVAS_TEXT:
             print "Item selected: TEXT"
@@ -99,6 +112,12 @@ class Application(GtkWindow):
             print "Item selected: PIXMAP"
         elif item.type == PLOT_CANVAS_DATA:
             print "Item selected: DATA"
+            (i, x, y) = canvas.get_active_point()
+            print "Active point: %d -> %f %f" % (i, x, y)
+            #canvas.get_active_data().add_marker(i)
+            #canvas.get_active_plot().queue_draw()
+        elif item.type == PLOT_CANVAS_MARKER:
+            print "Item selected: MARKER"
         elif item.type == PLOT_CANVAS_NONE:
             print "Item selected: NONE"
         plot = canvas.get_active_plot()

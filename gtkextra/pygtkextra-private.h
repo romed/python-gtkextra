@@ -161,6 +161,9 @@ extern gboolean pygtkextra_plot_data_register_plot_function(GtkPlotData *,
 extern gboolean pygtkextra_plot_data_register_plot3d_function(GtkPlotData *,
 							      PyObject *,
 							      PyObject *);
+extern gboolean pygtkextra_plot_data_register_plot_iterator(GtkPlotData *,
+							    PyObject *,
+							    PyObject *);
 extern gdouble pygtkextra_plot_data_call_plot_function(GtkPlot *,
 						       GtkPlotData *,
 						       gdouble, gboolean *);
@@ -168,6 +171,14 @@ extern gdouble pygtkextra_plot_data_call_plot3d_function(GtkPlot *,
 							 GtkPlotData *,
 							 gdouble, gdouble,
 							 gboolean *);
+extern void pygtkextra_plot_data_call_plot_iterator(GtkPlot *,
+						    GtkPlotData *,
+						    gint, gdouble *,
+						    gdouble *, gdouble *,
+						    gdouble *, gdouble *,
+						    gdouble *, gdouble *,
+						    gdouble *, gchar **,
+						    gboolean *);
 extern PyObject *pygtkextra_plot_data_set_points(GtkPlotData *, PyObject *,
 						 PyObject *, PyObject *,
 						 PyObject *, gint);
