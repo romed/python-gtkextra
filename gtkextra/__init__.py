@@ -1194,14 +1194,14 @@ class GtkPlot(_gtk.GtkWidget):
 		top-left corner to bottom-right corner).
 		"""
 		_gtkextra.gtk_plot_move(self._o, x, y)
-	def resize(self, width, heigth):
+	def resize(self, width, height):
 		"""Resize the widget.
 		width and height should both be in the range 0.0 .. 1.0,
 		this indicates which ratio of the drawable's screen
 		real-estate they should use.
 		"""
 		_gtkextra.gtk_plot_resize(self._o, width, height)
-	def move_resize(self, x, y, width, heigth):
+	def move_resize(self, x, y, width, height):
 		"""Move and resize the widget in a single operation.
 		This is faster than doing each operation separately.
 		"""
